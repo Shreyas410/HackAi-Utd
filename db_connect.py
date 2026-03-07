@@ -5,6 +5,10 @@ from typing import List, Optional
 from datetime import datetime, timezone
 import uuid
 from passlib.context import CryptContext
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # ==========================================
 # 1. DEFINE THE SCHEMA (Application Level)

@@ -47,7 +47,7 @@ class UserSkillProfile(BaseModel):
 # ==========================================
 
 # Replace <password> with your actual database user password
-MONGO_URI = "mongodb+srv://nahushpatil07_db_user:wGqGj8En75t6WWLf@hackai.d6vshfg.mongodb.net/?appName=HackAI"
+MONGO_URI = os.getenv("MONGO_URI")
 
 # Initialize the client
 client = MongoClient(MONGO_URI, server_api=ServerApi('1'))

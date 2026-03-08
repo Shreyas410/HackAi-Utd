@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Learning System</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🎓 Personalized Learning System</h1>
+            <p class="subtitle">AI-powered skill assessment and learning recommendations</p>
+        </header>
+
+        <!-- Progress Steps -->
+        <div class="progress-bar">
+            <div class="step active" data-step="1">
+                <span class="step-number">1</span>
+                <span class="step-label">Start</span>
+            </div>
+            <div class="step" data-step="2">
+                <span class="step-number">2</span>
+                <span class="step-label">Assessment</span>
+            </div>
+            <div class="step" data-step="3">
+                <span class="step-number">3</span>
+                <span class="step-label">Results</span>
+            </div>
+            <div class="step" data-step="4">
+                <span class="step-number">4</span>
+                <span class="step-label">Quiz</span>
+            </div>
+            <div class="step" data-step="5">
+                <span class="step-number">5</span>
+                <span class="step-label">Learn</span>
+            </div>
+        </div>
+
+        <!-- Step 1: Start Session -->
+        <section id="step-1" class="step-content active">
+            <div class="card">
+                <h2>Welcome! Let's Get Started</h2>
+                <p>Tell us what skill you'd like to learn, and we'll create a personalized learning path for you.</p>
+                
+                <div class="form-group">
+                    <label for="learner-name">Your Name</label>
+                    <input type="text" id="learner-name" placeholder="Enter your name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="skill-input">What skill do you want to learn?</label>
+                    <input type="text" id="skill-input" placeholder="e.g., Python programming, Machine Learning, Web Development, Data Science...">
+                    <small class="hint">Enter any skill - our AI will create a personalized learning path for you</small>
+                </div>
+                
+                <button class="btn primary" onclick="startSession()">
+                    Start Learning Journey →
+                </button>
+            </div>
+        </section>
+
+        <!-- Step 2: Questionnaire -->
+        <section id="step-2" class="step-content">
+            <div class="card">
+                <h2>Skill Assessment</h2>
+                <p>Answer these questions so we can understand your current level.</p>
+                
+                <div id="questionnaire-container">
+                    <!-- Questions will be loaded here -->
+                </div>
+                
+                <button class="btn primary" onclick="submitQuestionnaire()">
+                    Submit Assessment →
+                </button>
+            </div>
+        </section>
+
+        <!-- Step 3: Classification Results -->
+        <section id="step-3" class="step-content">
+            <div class="card">
+                <h2>Your Assessment Results</h2>
+                
+                <div id="classification-result">
+                    <div class="level-badge" id="level-badge">
+                        <span class="level-icon">🎯</span>
+                        <span class="level-text" id="assigned-level">Beginner</span>
+                    </div>
+                    
+                    <div class="confidence-bar">
+                        <label>Confidence: <span id="confidence-value">85%</span></label>
+                        <div class="bar">
+                            <div class="fill" id="confidence-fill" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="factors-list">
+                        <h4>Assessment Factors:</h4>
+                        <ul id="factors-list">
+                            <!-- Factors will be loaded here -->
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn secondary" onclick="showConceptMap()">
+                        📊 View Concept Map
+                    </button>
+                    <button class="btn primary" onclick="startQuiz()">
+                        Take Diagnostic Quiz →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 4: Quiz -->
+        <section id="step-4" class="step-content">
+            <div class="card">
+                <h2>Diagnostic Quiz</h2>
+                <p>Test your knowledge to refine your level assessment.</p>
+                
+                <div id="quiz-container">
+                    <!-- Quiz questions will be loaded here -->
+                </div>
+                
+                <button class="btn primary" onclick="submitQuiz()">
+                    Submit Quiz →
+                </button>
+            </div>
+        </section>
+
+        <!-- Step 5: Recommendations -->
+        <section id="step-5" class="step-content">
+            <div class="card">
+                <h2>Your Personalized Learning Path</h2>
+                
+                <div id="quiz-results" class="quiz-results hidden">
+                    <h3>Quiz Results</h3>
+                    <div class="scores-container">
+                        <div class="score-display">
+                            <span class="score-value" id="quiz-score">0%</span>
+                            <span class="score-label">Quiz Score</span>
+                        </div>
+                        <div class="score-display skill-score-display">
+                            <span class="score-value skill-score" id="skill-score">0</span>
+                            <span class="score-label">Skill Level</span>
+                            <span class="score-subtitle">(out of 10)</span>
+                        </div>
+                    </div>
+                    <p id="quiz-feedback" class="quiz-feedback"></p>
+                </div>
+                
+                <div id="recommendations-container">
+                    <h3>📚 Recommended Courses</h3>
+                    <div id="recommendations-list" class="recommendations-grid">
+                        <!-- Recommendations will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn secondary" onclick="showConceptMap()">
+                        📊 Concept Map
+                    </button>
+                    <button class="btn secondary" onclick="startOver()">
+                        🔄 Start Over
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Concept Map Modal -->
+        <div id="concept-map-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeConceptMap()">&times;</span>
+                <h2>Concept Map: <span id="concept-map-title"></span></h2>
+                <div id="concept-map-container">
+                    <img id="concept-map-image" src="" alt="Concept Map">
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="spinner"></div>
+            <p id="loading-text">Processing...</p>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

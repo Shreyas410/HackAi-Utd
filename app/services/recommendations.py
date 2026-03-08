@@ -839,6 +839,9 @@ class RecommendationService:
         # 8. Apply filters
         filtered = self._apply_filters(balanced, filter_options)
         
+        # 8b. YouTube only - drop any non-YouTube that might have slipped through
+        filtered = [c for c in filtered if c.platform == "youtube"]
+        
         # 9. Convert to response
         recommendations = []
         for candidate in filtered[:limit]:

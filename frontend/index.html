@@ -104,9 +104,6 @@
                 </div>
                 
                 <div class="button-group">
-                    <button class="btn secondary" onclick="showConceptMap()">
-                        📊 View Concept Map
-                    </button>
                     <button class="btn primary" onclick="startQuiz()">
                         Take Diagnostic Quiz →
                     </button>
@@ -159,9 +156,6 @@
                 </div>
                 
                 <div class="button-group">
-                    <button class="btn secondary" onclick="showConceptMap()">
-                        📊 Concept Map
-                    </button>
                     <button class="btn secondary" onclick="startOver()">
                         🔄 Start Over
                     </button>
@@ -169,16 +163,7 @@
             </div>
         </section>
 
-        <!-- Concept Map Modal -->
-        <div id="concept-map-modal" class="modal hidden">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeConceptMap()">&times;</span>
-                <h2>Concept Map: <span id="concept-map-title"></span></h2>
-                <div id="concept-map-container">
-                    <img id="concept-map-image" src="" alt="Concept Map">
-                </div>
-            </div>
-        </div>
+
 
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="loading-overlay hidden">

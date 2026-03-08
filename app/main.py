@@ -8,7 +8,7 @@ This API provides endpoints for:
 - Generating and scoring diagnostic quizzes
 - Scenario-based practice with branching logic
 - Concept map visualization
-- Course and resource recommendations (YouTube, Coursera, Udemy)
+- YouTube video recommendations with sentiment-based quality scores
 - Data privacy and user rights
 """
 
@@ -27,7 +27,6 @@ from .routers import (
     questionnaire_router,
     quiz_router,
     practice_router,
-    concept_map_router,
     resources_router,
     privacy_router
 )
@@ -80,8 +79,8 @@ and provides personalized content recommendations.
 - Indicates difficulty levels
 
 ### 📚 Resource Recommendations
-- Personalized recommendations from YouTube, Coursera, and Udemy
-- Filtered by level, modality, duration, and cost
+- Personalized YouTube video recommendations
+- Filtered by level, with sentiment-based quality scores from comment analysis
 - YouTube embed links with time-based snippets
 
 ### 🔒 Privacy & Ethics
@@ -124,7 +123,6 @@ app.include_router(sessions_router)
 app.include_router(questionnaire_router)
 app.include_router(quiz_router)
 app.include_router(practice_router)
-app.include_router(concept_map_router)
 app.include_router(resources_router)
 app.include_router(privacy_router)
 app.include_router(video_analysis_router)
@@ -147,7 +145,6 @@ async def root():
             "questionnaire": "/api/v1/questionnaire/submit",
             "quiz": "/api/v1/quiz/{session_id}",
             "practice": "/api/v1/practice/{session_id}/start",
-            "concept_map": "/api/v1/concept-map/{skill}",
             "resources": "/api/v1/resources/{session_id}",
             "privacy": "/api/v1/privacy/data-policy"
         }
@@ -190,12 +187,8 @@ def custom_openapi():
             "description": "Scenario-based practice with branching logic"
         },
         {
-            "name": "Concept Map",
-            "description": "Visual concept maps showing topic relationships"
-        },
-        {
             "name": "Resources",
-            "description": "Course and video recommendations from YouTube, Coursera, and Udemy"
+            "description": "YouTube video recommendations with sentiment analysis"
         },
         {
             "name": "Privacy",

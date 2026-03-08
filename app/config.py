@@ -51,5 +51,4 @@ settings = Settings()
 
 # Skill configurations - can be extended by adding new JSON files
 SKILLS_CONFIG_DIR = os.path.join(os.path.dirname(__file__), "data", "skills")
-CONCEPT_MAPS_DIR = os.path.join(os.path.dirname(__file__), "data", "concept_maps")
 RESOURCES_FILE = os.path.join(os.path.dirname(__file__), "data", "resources.json")

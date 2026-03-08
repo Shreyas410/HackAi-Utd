@@ -596,11 +596,7 @@ header h1 {
     color: var(--text);
 }
 
-#concept-map-image {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-}
+
 
 /* Loading Overlay */
 .loading-overlay {

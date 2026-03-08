@@ -186,8 +186,10 @@ Return ONLY a JSON array with the classification for each comment in order:
 Return exactly {len(comments[:50])} classifications."""
 
         try:
+            if not getattr(self.gemini_client, 'model', None):
+                return self._simple_classify_list(comments[:50])
             response = self.gemini_client.model.generate_content(prompt)
-            raw_text = response.text.strip()
+            raw_text = (response.text or "").strip()
             
             # Parse JSON response
             import json

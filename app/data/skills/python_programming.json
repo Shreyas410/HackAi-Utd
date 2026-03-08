@@ -71,10 +71,22 @@
         "prompt": "What is the correct way to declare a variable in Python?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "int x = 5"},
-          {"value": "b", "label": "x = 5"},
-          {"value": "c", "label": "var x = 5"},
-          {"value": "d", "label": "declare x = 5"}
+          {
+            "value": "a",
+            "label": "int x = 5"
+          },
+          {
+            "value": "b",
+            "label": "x = 5"
+          },
+          {
+            "value": "c",
+            "label": "var x = 5"
+          },
+          {
+            "value": "d",
+            "label": "declare x = 5"
+          }
         ],
         "correct_answer": "b",
         "explanation": "Python uses dynamic typing; you simply assign a value to create a variable.",
@@ -85,10 +97,22 @@
         "prompt": "Which of the following is a valid Python list?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "[1, 2, 3]"},
-          {"value": "b", "label": "(1, 2, 3)"},
-          {"value": "c", "label": "{1, 2, 3}"},
-          {"value": "d", "label": "{1: 'a', 2: 'b'}"}
+          {
+            "value": "a",
+            "label": "[1, 2, 3]"
+          },
+          {
+            "value": "b",
+            "label": "(1, 2, 3)"
+          },
+          {
+            "value": "c",
+            "label": "{1, 2, 3}"
+          },
+          {
+            "value": "d",
+            "label": "{1: 'a', 2: 'b'}"
+          }
         ],
         "correct_answer": "a",
         "explanation": "Lists use square brackets. Parentheses create tuples, curly braces create sets or dicts.",
@@ -99,10 +123,22 @@
         "prompt": "How do you print 'Hello, World!' in Python?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "echo('Hello, World!')"},
-          {"value": "b", "label": "console.log('Hello, World!')"},
-          {"value": "c", "label": "print('Hello, World!')"},
-          {"value": "d", "label": "System.out.println('Hello, World!')"}
+          {
+            "value": "a",
+            "label": "echo('Hello, World!')"
+          },
+          {
+            "value": "b",
+            "label": "console.log('Hello, World!')"
+          },
+          {
+            "value": "c",
+            "label": "print('Hello, World!')"
+          },
+          {
+            "value": "d",
+            "label": "System.out.println('Hello, World!')"
+          }
         ],
         "correct_answer": "c",
         "explanation": "Python uses the print() function for output.",
@@ -113,10 +149,22 @@
         "prompt": "What is the result of 10 // 3 in Python?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "3.33"},
-          {"value": "b", "label": "3"},
-          {"value": "c", "label": "4"},
-          {"value": "d", "label": "1"}
+          {
+            "value": "a",
+            "label": "3.33"
+          },
+          {
+            "value": "b",
+            "label": "3"
+          },
+          {
+            "value": "c",
+            "label": "4"
+          },
+          {
+            "value": "d",
+            "label": "1"
+          }
         ],
         "correct_answer": "b",
         "explanation": "The // operator performs integer (floor) division, returning 3.",
@@ -127,10 +175,22 @@
         "prompt": "Which keyword is used to define a function in Python?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "function"},
-          {"value": "b", "label": "func"},
-          {"value": "c", "label": "def"},
-          {"value": "d", "label": "define"}
+          {
+            "value": "a",
+            "label": "function"
+          },
+          {
+            "value": "b",
+            "label": "func"
+          },
+          {
+            "value": "c",
+            "label": "def"
+          },
+          {
+            "value": "d",
+            "label": "define"
+          }
         ],
         "correct_answer": "c",
         "explanation": "Python uses the 'def' keyword to define functions.",
@@ -141,10 +201,22 @@
         "prompt": "What does the len() function do?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "Returns the type of an object"},
-          {"value": "b", "label": "Returns the length/count of items"},
-          {"value": "c", "label": "Converts to lowercase"},
-          {"value": "d", "label": "Rounds a number"}
+          {
+            "value": "a",
+            "label": "Returns the type of an object"
+          },
+          {
+            "value": "b",
+            "label": "Returns the length/count of items"
+          },
+          {
+            "value": "c",
+            "label": "Converts to lowercase"
+          },
+          {
+            "value": "d",
+            "label": "Rounds a number"
+          }
         ],
         "correct_answer": "b",
         "explanation": "len() returns the number of items in a sequence or collection.",
@@ -155,10 +227,22 @@
         "prompt": "How do you start a comment in Python?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "//"},
-          {"value": "b", "label": "/*"},
-          {"value": "c", "label": "#"},
-          {"value": "d", "label": "--"}
+          {
+            "value": "a",
+            "label": "//"
+          },
+          {
+            "value": "b",
+            "label": "/*"
+          },
+          {
+            "value": "c",
+            "label": "#"
+          },
+          {
+            "value": "d",
+            "label": "--"
+          }
         ],
         "correct_answer": "c",
         "explanation": "Python uses # for single-line comments.",
@@ -171,10 +255,22 @@
         "prompt": "You need to process a list of numbers and return only the even ones. Which approach is most Pythonic?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "Use a for loop with an if statement and append to a new list"},
-          {"value": "b", "label": "Use a list comprehension: [x for x in numbers if x % 2 == 0]"},
-          {"value": "c", "label": "Use filter(lambda x: x % 2 == 0, numbers)"},
-          {"value": "d", "label": "Both B and C are Pythonic, but B is generally preferred for readability"}
+          {
+            "value": "a",
+            "label": "Use a for loop with an if statement and append to a new list"
+          },
+          {
+            "value": "b",
+            "label": "Use a list comprehension: [x for x in numbers if x % 2 == 0]"
+          },
+          {
+            "value": "c",
+            "label": "Use filter(lambda x: x % 2 == 0, numbers)"
+          },
+          {
+            "value": "d",
+            "label": "Both B and C are Pythonic, but B is generally preferred for readability"
+          }
         ],
         "correct_answer": "d",
         "explanation": "List comprehensions are considered more readable and Pythonic than filter() for simple cases.",
@@ -185,10 +281,22 @@
         "prompt": "What is the purpose of the 'with' statement when working with files?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "It makes file operations faster"},
-          {"value": "b", "label": "It automatically handles closing the file, even if an exception occurs"},
-          {"value": "c", "label": "It allows reading and writing simultaneously"},
-          {"value": "d", "label": "It encrypts the file contents"}
+          {
+            "value": "a",
+            "label": "It makes file operations faster"
+          },
+          {
+            "value": "b",
+            "label": "It automatically handles closing the file, even if an exception occurs"
+          },
+          {
+            "value": "c",
+            "label": "It allows reading and writing simultaneously"
+          },
+          {
+            "value": "d",
+            "label": "It encrypts the file contents"
+          }
         ],
         "correct_answer": "b",
         "explanation": "The 'with' statement is a context manager that ensures proper resource cleanup.",
@@ -199,10 +307,22 @@
         "prompt": "Given a class Animal with method speak(), how would you create a Dog class that overrides speak()?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "class Dog extends Animal: def speak(self): ..."},
-          {"value": "b", "label": "class Dog(Animal): def speak(self): ..."},
-          {"value": "c", "label": "class Dog implements Animal: def speak(self): ..."},
-          {"value": "d", "label": "class Dog: inherits Animal: def speak(self): ..."}
+          {
+            "value": "a",
+            "label": "class Dog extends Animal: def speak(self): ..."
+          },
+          {
+            "value": "b",
+            "label": "class Dog(Animal): def speak(self): ..."
+          },
+          {
+            "value": "c",
+            "label": "class Dog implements Animal: def speak(self): ..."
+          },
+          {
+            "value": "d",
+            "label": "class Dog: inherits Animal: def speak(self): ..."
+          }
         ],
         "correct_answer": "b",
         "explanation": "Python uses parentheses for inheritance: class ChildClass(ParentClass).",
@@ -213,10 +333,22 @@
         "prompt": "What will be the output of: print([i**2 for i in range(5)])?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "[1, 4, 9, 16, 25]"},
-          {"value": "b", "label": "[0, 1, 4, 9, 16]"},
-          {"value": "c", "label": "[0, 2, 4, 6, 8]"},
-          {"value": "d", "label": "[1, 2, 3, 4, 5]"}
+          {
+            "value": "a",
+            "label": "[1, 4, 9, 16, 25]"
+          },
+          {
+            "value": "b",
+            "label": "[0, 1, 4, 9, 16]"
+          },
+          {
+            "value": "c",
+            "label": "[0, 2, 4, 6, 8]"
+          },
+          {
+            "value": "d",
+            "label": "[1, 2, 3, 4, 5]"
+          }
         ],
         "correct_answer": "b",
         "explanation": "range(5) gives 0-4, and squaring each gives [0, 1, 4, 9, 16].",
@@ -227,10 +359,22 @@
         "prompt": "Which exception should you catch when trying to access a dictionary key that might not exist?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "IndexError"},
-          {"value": "b", "label": "KeyError"},
-          {"value": "c", "label": "ValueError"},
-          {"value": "d", "label": "AttributeError"}
+          {
+            "value": "a",
+            "label": "IndexError"
+          },
+          {
+            "value": "b",
+            "label": "KeyError"
+          },
+          {
+            "value": "c",
+            "label": "ValueError"
+          },
+          {
+            "value": "d",
+            "label": "AttributeError"
+          }
         ],
         "correct_answer": "b",
         "explanation": "KeyError is raised when accessing a non-existent dictionary key.",
@@ -241,10 +385,22 @@
         "prompt": "What is the difference between *args and **kwargs in function definitions?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "*args captures keyword arguments, **kwargs captures positional"},
-          {"value": "b", "label": "*args captures positional arguments as tuple, **kwargs captures keyword arguments as dict"},
-          {"value": "c", "label": "They are interchangeable"},
-          {"value": "d", "label": "*args is for lists, **kwargs is for dictionaries"}
+          {
+            "value": "a",
+            "label": "*args captures keyword arguments, **kwargs captures positional"
+          },
+          {
+            "value": "b",
+            "label": "*args captures positional arguments as tuple, **kwargs captures keyword arguments as dict"
+          },
+          {
+            "value": "c",
+            "label": "They are interchangeable"
+          },
+          {
+            "value": "d",
+            "label": "*args is for lists, **kwargs is for dictionaries"
+          }
         ],
         "correct_answer": "b",
         "explanation": "*args collects extra positional arguments into a tuple, **kwargs collects keyword arguments into a dict.",
@@ -256,7 +412,12 @@
         "question_id": "py_a1",
         "prompt": "You're building an API rate limiter. Which approach best implements a decorator that limits function calls to N per minute?",
         "type": "text",
-        "expected_concepts": ["decorator", "time tracking", "closure", "functools.wraps"],
+        "expected_concepts": [
+          "decorator",
+          "time tracking",
+          "closure",
+          "functools.wraps"
+        ],
         "rubric": "Should mention using a decorator pattern, tracking call times, and using closures or class-based decorator.",
         "points": 3
       },
@@ -264,7 +425,12 @@
         "question_id": "py_a2",
         "prompt": "Explain how Python's Global Interpreter Lock (GIL) affects multithreading and when you would use multiprocessing instead.",
         "type": "text",
-        "expected_concepts": ["GIL", "CPU-bound vs I/O-bound", "multiprocessing", "concurrent.futures"],
+        "expected_concepts": [
+          "GIL",
+          "CPU-bound vs I/O-bound",
+          "multiprocessing",
+          "concurrent.futures"
+        ],
         "rubric": "Should explain GIL prevents true parallelism for CPU-bound tasks, threads work for I/O-bound, multiprocessing for CPU-bound.",
         "points": 3
       },
@@ -273,10 +439,22 @@
         "prompt": "What is a metaclass in Python, and when might you use one?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "A class that cannot be instantiated, like an abstract class"},
-          {"value": "b", "label": "A class that creates classes, controlling class creation behavior"},
-          {"value": "c", "label": "A deprecated feature replaced by dataclasses"},
-          {"value": "d", "label": "A class used only for type hints"}
+          {
+            "value": "a",
+            "label": "A class that cannot be instantiated, like an abstract class"
+          },
+          {
+            "value": "b",
+            "label": "A class that creates classes, controlling class creation behavior"
+          },
+          {
+            "value": "c",
+            "label": "A deprecated feature replaced by dataclasses"
+          },
+          {
+            "value": "d",
+            "label": "A class used only for type hints"
+          }
         ],
         "correct_answer": "b",
         "explanation": "Metaclasses are 'classes of classes' that control class creation, useful for frameworks and ORMs.",
@@ -287,10 +465,22 @@
         "prompt": "In an async application, you need to run both CPU-intensive and I/O operations. How would you structure this?",
         "type": "multiple_choice",
         "options": [
-          {"value": "a", "label": "Use async/await for everything"},
-          {"value": "b", "label": "Use threads for everything"},
-          {"value": "c", "label": "Use asyncio for I/O and run_in_executor with ProcessPoolExecutor for CPU tasks"},
-          {"value": "d", "label": "Avoid mixing them in the same application"}
+          {
+            "value": "a",
+            "label": "Use async/await for everything"
+          },
+          {
+            "value": "b",
+            "label": "Use threads for everything"
+          },
+          {
+            "value": "c",
+            "label": "Use asyncio for I/O and run_in_executor with ProcessPoolExecutor for CPU tasks"
+          },
+          {
+            "value": "d",
+            "label": "Avoid mixing them in the same application"
+          }
         ],
         "correct_answer": "c",
         "explanation": "asyncio handles I/O efficiently, while run_in_executor offloads CPU work to separate processes.",
@@ -300,7 +490,13 @@
         "question_id": "py_a5",
         "prompt": "Design a context manager that times code execution and logs if it exceeds a threshold. Describe your approach.",
         "type": "text",
-        "expected_concepts": ["__enter__", "__exit__", "contextlib", "time measurement", "exception handling"],
+        "expected_concepts": [
+          "__enter__",
+          "__exit__",
+          "contextlib",
+          "time measurement",
+          "exception handling"
+        ],
         "rubric": "Should implement __enter__/__exit__ or use @contextmanager, measure time, handle exceptions properly.",
         "points": 3
       }
@@ -322,9 +518,21 @@
           "node_id": "start",
           "narrative": "You're tasked with processing a large CSV file containing customer data. The file has 1 million rows and includes customer IDs, purchase amounts, and timestamps. Your goal is to calculate daily totals. How do you approach reading the file?",
           "actions": [
-            {"action_id": "a1", "description": "Load the entire file into memory with pandas.read_csv()", "is_optimal": false},
-            {"action_id": "a2", "description": "Use csv module with a generator to process row by row", "is_optimal": true},
-            {"action_id": "a3", "description": "Read the file line by line with file.readlines()", "is_optimal": false}
+            {
+              "action_id": "a1",
+              "description": "Load the entire file into memory with pandas.read_csv()",
+              "is_optimal": false
+            },
+            {
+              "action_id": "a2",
+              "description": "Use csv module with a generator to process row by row",
+              "is_optimal": true
+            },
+            {
+              "action_id": "a3",
+              "description": "Read the file line by line with file.readlines()",
+              "is_optimal": false
+            }
           ],
           "is_terminal": false
         },
@@ -332,8 +540,16 @@
           "node_id": "node_memory",
           "narrative": "You chose to load everything into memory. With 1M rows, your script runs but consumes 2GB RAM and crashes on a smaller server. How do you fix this?",
           "actions": [
-            {"action_id": "a1", "description": "Add more RAM to the server", "is_optimal": false},
-            {"action_id": "a2", "description": "Refactor to use chunked reading with pandas or generators", "is_optimal": true}
+            {
+              "action_id": "a1",
+              "description": "Add more RAM to the server",
+              "is_optimal": false
+            },
+            {
+              "action_id": "a2",
+              "description": "Refactor to use chunked reading with pandas or generators",
+              "is_optimal": true
+            }
           ],
           "is_terminal": false
         },
@@ -341,9 +557,21 @@
           "node_id": "node_efficient",
           "narrative": "Good choice! Processing row by row keeps memory usage low. Now you need to aggregate daily totals. Which data structure would you use?",
           "actions": [
-            {"action_id": "a1", "description": "A list of tuples [(date, total), ...]", "is_optimal": false},
-            {"action_id": "a2", "description": "A defaultdict(float) keyed by date", "is_optimal": true},
-            {"action_id": "a3", "description": "A pandas DataFrame", "is_optimal": false}
+            {
+              "action_id": "a1",
+              "description": "A list of tuples [(date, total), ...]",
+              "is_optimal": false
+            },
+            {
+              "action_id": "a2",
+              "description": "A defaultdict(float) keyed by date",
+              "is_optimal": true
+            },
+            {
+              "action_id": "a3",
+              "description": "A pandas DataFrame",
+              "is_optimal": false
+            }
           ],
           "is_terminal": false
         },
@@ -355,9 +583,20 @@
         }
       },
       "transitions": {
-        "start": {"a1": "node_memory", "a2": "node_efficient", "a3": "node_memory"},
-        "node_memory": {"a1": "node_memory", "a2": "node_efficient"},
-        "node_efficient": {"a1": "node_final", "a2": "node_final", "a3": "node_final"}
+        "start": {
+          "a1": "node_memory",
+          "a2": "node_efficient",
+          "a3": "node_memory"
+        },
+        "node_memory": {
+          "a1": "node_memory",
+          "a2": "node_efficient"
+        },
+        "node_efficient": {
+          "a1": "node_final",
+          "a2": "node_final",
+          "a3": "node_final"
+        }
       },
       "feedback": {
         "a1_start": "Loading large files entirely into memory can cause crashes. Consider streaming approaches.",
@@ -366,35 +605,5 @@
         "a2_node_efficient": "defaultdict is perfect here - O(1) lookup and automatic initialization."
       }
     }
-  ],
-  "concept_map": {
-    "nodes": [
-      {"id": "python", "label": "Python", "level": null},
-      {"id": "syntax", "label": "Basic Syntax", "level": "beginner"},
-      {"id": "control_flow", "label": "Control Flow", "level": "beginner"},
-      {"id": "data_structures", "label": "Data Structures", "level": "beginner"},
-      {"id": "functions", "label": "Functions", "level": "intermediate"},
-      {"id": "modules", "label": "Modules", "level": "intermediate"},
-      {"id": "file_io", "label": "File I/O", "level": "intermediate"},
-      {"id": "oop", "label": "OOP", "level": "intermediate"},
-      {"id": "decorators", "label": "Decorators", "level": "advanced"},
-      {"id": "generators", "label": "Generators", "level": "advanced"},
-      {"id": "async", "label": "Async/Await", "level": "advanced"},
-      {"id": "testing", "label": "Testing", "level": "advanced"}
-    ],
-    "edges": [
-      {"source": "python", "target": "syntax", "relationship": "foundation"},
-      {"source": "syntax", "target": "control_flow", "relationship": "builds_on"},
-      {"source": "syntax", "target": "data_structures", "relationship": "builds_on"},
-      {"source": "control_flow", "target": "functions", "relationship": "builds_on"},
-      {"source": "data_structures", "target": "functions", "relationship": "used_in"},
-      {"source": "functions", "target": "modules", "relationship": "organized_into"},
-      {"source": "functions", "target": "oop", "relationship": "extended_by"},
-      {"source": "data_structures", "target": "file_io", "relationship": "used_in"},
-      {"source": "oop", "target": "decorators", "relationship": "enables"},
-      {"source": "functions", "target": "generators", "relationship": "special_form"},
-      {"source": "functions", "target": "async", "relationship": "async_version"},
-      {"source": "modules", "target": "testing", "relationship": "tested_with"}
-    ]
-  }
+  ]
 }

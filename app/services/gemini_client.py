@@ -170,8 +170,8 @@ If data is ambiguous, lean toward the lower level to ensure appropriate content 
 - Preferred formats: {modalities_str}{interests_str}
 
 === CRITICAL REQUIREMENTS ===
-1. ONLY platforms: youtube, coursera, udemy
-2. Prefer REAL, EXISTING courses you are confident about
+1. ONLY platform: youtube (no Coursera, no Udemy)
+2. Prefer REAL, EXISTING videos you are confident about
 3. If you know the actual URL, include it
 4. If you are NOT confident about a URL, OMIT the url field entirely
 5. NEVER hallucinate or make up fake URLs
@@ -181,25 +181,21 @@ If data is ambiguous, lean toward the lower level to ensure appropriate content 
 Return ONLY valid JSON array. NO markdown. NO explanation.
 
 Each item MUST have:
-- "title": exact or close course/video title
-- "platform": "youtube" or "coursera" or "udemy"
+- "title": exact or close video/course title
+- "platform": "youtube" (only YouTube)
 - "description": brief description
 - "reason": why good for {level} learner
 - "difficulty": "{level}"
 - "query": search terms to find this (always include)
 
 Each item SHOULD have (if you are confident):
-- "url": DIRECT URL to the course/video (NOT a search URL)
+- "url": DIRECT URL to the video (NOT a search URL)
 
 === URL GUIDELINES ===
 YouTube: https://www.youtube.com/watch?v=VIDEO_ID
-Coursera: https://www.coursera.org/learn/COURSE-NAME
-Udemy: https://www.udemy.com/course/COURSE-NAME/
 
 DO NOT return search result URLs like:
 - youtube.com/results?search_query=
-- coursera.org/search?query=
-- udemy.com/courses/search/
 
 === EXAMPLE OUTPUT ===
 [
@@ -213,20 +209,11 @@ DO NOT return search result URLs like:
     "difficulty": "beginner"
   }},
   {{
-    "title": "Python for Everybody",
-    "platform": "coursera",
-    "url": "https://www.coursera.org/specializations/python",
-    "query": "python for everybody coursera",
-    "description": "University of Michigan Python specialization",
-    "reason": "Most popular Python course on Coursera",
-    "difficulty": "beginner"
-  }},
-  {{
-    "title": "Web Development Course",
-    "platform": "udemy",
-    "query": "complete web development bootcamp",
-    "description": "Full-stack web development",
-    "reason": "Comprehensive web dev training",
+    "title": "Python for Everybody - Full Course",
+    "platform": "youtube",
+    "query": "python for everybody freecodecamp",
+    "description": "Complete Python course",
+    "reason": "Comprehensive Python for beginners",
     "difficulty": "beginner"
   }}
 ]
@@ -264,8 +251,8 @@ Return {num_recommendations} recommendations as JSON:"""
                     continue
                 
                 platform = item.get("platform", "").lower()
-                if platform not in ["youtube", "coursera", "udemy"]:
-                    print(f"[Gemini] Rejected invalid platform: {platform}")
+                if platform != "youtube":
+                    print(f"[Gemini] Rejected non-YouTube platform: {platform}")
                     continue
                 
                 title = item.get("title", "")

@@ -393,9 +393,14 @@ function renderRecommendations(recommendations, meta) {
     }).join('');
 }
 
-// Extract YouTube video ID from URL
 function extractVideoId(url) {
     if (!url) return null;
+    
+    // Ignore search URLs - they don't map to a single video
+    if (url.includes('results?search_query') || url.includes('/search')) {
+        return null;
+    }
+    
     const patterns = [
         /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
         /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/
@@ -414,41 +419,66 @@ async function analyzeSentiment(videoId, cardIndex) {
     
     try {
         const response = await fetch(`${API_BASE}/video-analysis/analyze?video_id=${videoId}`);
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
         
-        if (data.error) {
-            container.innerHTML = `<div class="sentiment-error">Could not analyze: ${data.message}</div>`;
+        if (!response.ok) {
+            let msg = data.message || 'Request failed';
+            if (data.detail) {
+                if (typeof data.detail === 'string') msg = data.detail;
+                else if (data.detail.message) msg = data.detail.message;
+                else if (Array.isArray(data.detail)) msg = data.detail.map(d => d.msg || d).join(' ');
+                else msg = data.detail.error || JSON.stringify(data.detail);
+            }
+            container.innerHTML = `<div class="sentiment-error">Could not analyze: ${escapeHtml(msg)}</div>`;
             return;
         }
         
-        // Store for comparison
+        if (data.error) {
+            container.innerHTML = `<div class="sentiment-error">Could not analyze: ${escapeHtml(data.message || 'Unknown error')}</div>`;
+            return;
+        }
+        
+        if (!data.sentiment || typeof data.sentiment.score !== 'number') {
+            container.innerHTML = '<div class="sentiment-error">Sentiment data unavailable. Comments may be disabled or the video could not be loaded.</div>';
+            return;
+        }
+        
         state.analyzedVideos = state.analyzedVideos || {};
         state.analyzedVideos[videoId] = data;
         
         renderSentimentResult(container, data.sentiment, videoId);
     } catch (error) {
-        container.innerHTML = `<div class="sentiment-error">Analysis failed: ${error.message}</div>`;
+        container.innerHTML = `<div class="sentiment-error">Analysis failed: ${escapeHtml(error.message)}</div>`;
     }
 }
 
 // Render sentiment analysis result
 function renderSentimentResult(container, sentiment, videoId) {
-    const scoreClass = sentiment.score >= 4 ? 'excellent' : 
-                      sentiment.score >= 3 ? 'good' : 
-                      sentiment.score >= 2 ? 'average' : 'poor';
+    if (!sentiment || typeof sentiment.score !== 'number') {
+        container.innerHTML = '<div class="sentiment-error">No sentiment data available.</div>';
+        return;
+    }
+    
+    const score = Number(sentiment.score);
+    const scoreClass = score >= 4 ? 'excellent' : score >= 3 ? 'good' : score >= 2 ? 'average' : 'poor';
+    const summary = sentiment.summary || (score + '/5');
+    const confidence = typeof sentiment.confidence === 'number' ? Math.round(sentiment.confidence * 100) : 0;
+    const pos = Number(sentiment.positive_count) || 0;
+    const neu = Number(sentiment.neutral_count) || 0;
+    const neg = Number(sentiment.negative_count) || 0;
     
     container.innerHTML = `
         <div class="sentiment-result ${scoreClass}">
             <div class="sentiment-header">
-                <span class="sentiment-score">${sentiment.summary}</span>
-                <span class="sentiment-confidence">Confidence: ${Math.round(sentiment.confidence * 100)}%</span>
+                <span class="sentiment-score">${escapeHtml(summary)}</span>
+                <span class="sentiment-confidence">Confidence: ${confidence}%</span>
             </div>
             <div class="sentiment-breakdown">
-                <span class="positive">👍 ${sentiment.positive_count}</span>
-                <span class="neutral">😐 ${sentiment.neutral_count}</span>
-                <span class="negative">👎 ${sentiment.negative_count}</span>
+                <span class="positive">👍 ${pos}</span>
+                <span class="neutral">😐 ${neu}</span>
+                <span class="negative">👎 ${neg}</span>
             </div>
-            ${sentiment.note ? `<div class="sentiment-note">${sentiment.note}</div>` : ''}
+            ${sentiment.note ? `<div class="sentiment-note">${escapeHtml(sentiment.note)}</div>` : ''}
             <button class="compare-btn" onclick="showCompareModal('${videoId}')">Compare with another video</button>
         </div>
     `;
@@ -588,21 +618,22 @@ function renderPlaceholderRecommendations() {
     const container = document.getElementById('recommendations-list');
     const level = state.currentLevel || 'beginner';
     
+    // YouTube only - no Coursera or Udemy
     const placeholders = {
         beginner: [
             { platform: 'youtube', title: 'Python for Beginners - Full Course', duration: 4.5, free: true },
-            { platform: 'coursera', title: 'Python Fundamentals Specialization', duration: 40, free: false },
-            { platform: 'udemy', title: 'Complete Python Bootcamp', duration: 22, free: false }
+            { platform: 'youtube', title: 'CS50: Introduction to Computer Science', duration: 25, free: true },
+            { platform: 'youtube', title: 'JavaScript Tutorial for Beginners', duration: 3, free: true }
         ],
         intermediate: [
             { platform: 'youtube', title: 'Intermediate Python Projects', duration: 6, free: true },
-            { platform: 'coursera', title: 'Python Data Structures', duration: 30, free: false },
-            { platform: 'udemy', title: 'Python OOP Deep Dive', duration: 15, free: false }
+            { platform: 'youtube', title: 'Node.js and Express - Full Course', duration: 8, free: true },
+            { platform: 'youtube', title: 'React Tutorial for Beginners', duration: 4, free: true }
         ],
         advanced: [
             { platform: 'youtube', title: 'Advanced Python Techniques', duration: 3, free: true },
-            { platform: 'udemy', title: 'Python Design Patterns', duration: 12, free: false },
-            { platform: 'coursera', title: 'Applied Python Development', duration: 50, free: false }
+            { platform: 'youtube', title: 'System Design Interview Prep', duration: 2, free: true },
+            { platform: 'youtube', title: 'Machine Learning Fundamentals', duration: 5, free: true }
         ]
     };
     
@@ -621,28 +652,7 @@ function renderPlaceholderRecommendations() {
     `).join('');
 }
 
-// Concept Map
-async function showConceptMap() {
-    showLoading('Loading concept map...');
-    
-    try {
-        const skillEncoded = encodeURIComponent(state.skill);
-        const imageUrl = `${API_BASE}/concept-map/${skillEncoded}/image`;
-        
-        document.getElementById('concept-map-title').textContent = state.skill;
-        document.getElementById('concept-map-image').src = imageUrl;
-        document.getElementById('concept-map-modal').classList.remove('hidden');
-        
-        hideLoading();
-    } catch (error) {
-        hideLoading();
-        alert('Failed to load concept map: ' + error.message);
-    }
-}
 
-function closeConceptMap() {
-    document.getElementById('concept-map-modal').classList.add('hidden');
-}
 
 // Start Over
 function startOver() {
@@ -668,19 +678,5 @@ function startOver() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    // Close modal on outside click
-    document.getElementById('concept-map-modal').addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            closeConceptMap();
-        }
-    });
-    
-    // Close modal on escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            closeConceptMap();
-        }
-    });
-    
     console.log('Personalized Learning System loaded');
 });

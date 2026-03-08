@@ -199,47 +199,129 @@ class QuizGeneratorService:
         questions = []
         
         if level == SkillLevel.BEGINNER:
-            templates = [
-                f"What is the primary purpose of {skill}?",
-                f"Which of the following is a key concept in {skill}?",
-                f"What is a common use case for {skill}?",
-                f"Which term best describes a fundamental element of {skill}?",
-                f"What is typically the first step when starting with {skill}?"
+            quiz_data = [
+                {
+                    "prompt": f"What is the primary purpose of {skill}?",
+                    "options": [
+                        ("a", f"Building applications and solving problems in its domain"),
+                        ("b", "Managing hardware resources directly"),
+                        ("c", "Only for database administration"),
+                        ("d", "Exclusively for system security")
+                    ],
+                    "correct": "a"
+                },
+                {
+                    "prompt": f"Which of the following best describes {skill}?",
+                    "options": [
+                        ("a", "An outdated technology no longer in use"),
+                        ("b", f"A tool/technology widely used in modern development"),
+                        ("c", "Only useful for academic purposes"),
+                        ("d", "A hardware specification standard")
+                    ],
+                    "correct": "b"
+                },
+                {
+                    "prompt": f"What is a common use case for {skill}?",
+                    "options": [
+                        ("a", f"Building real-world applications and projects"),
+                        ("b", "Only theoretical calculations"),
+                        ("c", "Manufacturing physical devices"),
+                        ("d", "None - it has no practical applications")
+                    ],
+                    "correct": "a"
+                },
+                {
+                    "prompt": f"When learning {skill}, what should you focus on first?",
+                    "options": [
+                        ("a", "Advanced optimization techniques"),
+                        ("b", f"Understanding the basic concepts and fundamentals"),
+                        ("c", "Memorizing all syntax without practice"),
+                        ("d", "Skipping documentation entirely")
+                    ],
+                    "correct": "b"
+                },
+                {
+                    "prompt": f"Why is {skill} valuable to learn?",
+                    "options": [
+                        ("a", "It has no job market demand"),
+                        ("b", "It can only be used offline"),
+                        ("c", f"It is widely used with strong industry demand"),
+                        ("d", "It requires no practice to master")
+                    ],
+                    "correct": "c"
+                }
             ]
-            for i, prompt in enumerate(templates[:num_questions]):
+            for i, q in enumerate(quiz_data[:num_questions]):
                 questions.append(QuizQuestion(
                     question_id=f"generic_b_{i}",
                     type=QuestionType.MULTIPLE_CHOICE,
-                    prompt=prompt,
-                    options=[
-                        QuestionOption(value="a", label="Option A"),
-                        QuestionOption(value="b", label="Option B"),
-                        QuestionOption(value="c", label="Option C"),
-                        QuestionOption(value="d", label="Option D")
-                    ],
+                    prompt=q["prompt"],
+                    options=[QuestionOption(value=v, label=l) for v, l in q["options"]],
+                    correct_answer=q["correct"],
                     difficulty=level,
                     points=1
                 ))
         
         elif level == SkillLevel.INTERMEDIATE:
-            templates = [
-                f"In a practical scenario, how would you apply {skill} to solve [problem]?",
-                f"What approach would you take when facing [challenge] in {skill}?",
-                f"Given a requirement to [task], which {skill} technique is most appropriate?",
-                f"How would you debug a common issue in {skill}?",
-                f"What are the trade-offs between different approaches in {skill}?"
+            quiz_data = [
+                {
+                    "prompt": f"When debugging an issue in {skill}, what is the best first step?",
+                    "options": [
+                        ("a", "Rewrite the entire codebase"),
+                        ("b", f"Identify and isolate the problem area systematically"),
+                        ("c", "Ignore the error and hope it goes away"),
+                        ("d", "Delete all related files")
+                    ],
+                    "correct": "b"
+                },
+                {
+                    "prompt": f"What makes code in {skill} maintainable?",
+                    "options": [
+                        ("a", "Writing everything in one large file"),
+                        ("b", "Using cryptic variable names"),
+                        ("c", f"Following best practices, clear naming, and modular design"),
+                        ("d", "Avoiding all comments and documentation")
+                    ],
+                    "correct": "c"
+                },
+                {
+                    "prompt": f"How do you handle errors effectively in {skill}?",
+                    "options": [
+                        ("a", "Ignore all errors"),
+                        ("b", f"Use proper error handling and provide meaningful feedback"),
+                        ("c", "Let the application crash without handling"),
+                        ("d", "Hide errors from users without logging")
+                    ],
+                    "correct": "b"
+                },
+                {
+                    "prompt": f"What is important when scaling a {skill} application?",
+                    "options": [
+                        ("a", f"Performance optimization and efficient resource usage"),
+                        ("b", "Using the oldest available version"),
+                        ("c", "Avoiding all testing"),
+                        ("d", "Hardcoding all configuration values")
+                    ],
+                    "correct": "a"
+                },
+                {
+                    "prompt": f"Which practice improves {skill} project quality?",
+                    "options": [
+                        ("a", "Skipping code reviews"),
+                        ("b", "Never writing tests"),
+                        ("c", f"Writing tests and following coding standards"),
+                        ("d", "Deploying without any verification")
+                    ],
+                    "correct": "c"
+                }
             ]
-            for i, prompt in enumerate(templates[:num_questions]):
+            for i, q in enumerate(quiz_data[:num_questions]):
                 questions.append(QuizQuestion(
                     question_id=f"generic_i_{i}",
                     type=QuestionType.MULTIPLE_CHOICE,
-                    prompt=prompt,
-                    options=[
-                        QuestionOption(value="a", label="Approach A"),
-                        QuestionOption(value="b", label="Approach B"),
-                        QuestionOption(value="c", label="Approach C"),
-                        QuestionOption(value="d", label="Approach D")
-                    ],
+                    prompt=q["prompt"],
+                    options=[QuestionOption(value=v, label=l) for v, l in q["options"]],
+                    correct_answer=q["correct"],
                     difficulty=level,
                     points=2
                 ))

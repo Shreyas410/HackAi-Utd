@@ -301,7 +301,7 @@ async function loadRecommendations() {
     try {
         // Request more recommendations (limit=6)
         const response = await apiCall(`/resources/${state.sessionId}/recommendations?limit=6`);
-        renderRecommendations(response.recommendations);
+        renderRecommendations(response.recommendations, response.meta);
     } catch (error) {
         console.error('Failed to load recommendations:', error);
         // Show placeholder recommendations
@@ -309,7 +309,7 @@ async function loadRecommendations() {
     }
 }
 
-function renderRecommendations(recommendations) {
+function renderRecommendations(recommendations, meta) {
     const container = document.getElementById('recommendations-list');
     
     if (!recommendations || recommendations.length === 0) {
@@ -317,29 +317,73 @@ function renderRecommendations(recommendations) {
         return;
     }
     
+    // Show pipeline metadata for debugging
+    if (meta) {
+        console.log('Recommendation pipeline:', meta);
+        console.log(`YouTube API: ${meta.youtube_api_used ? 'Yes' : 'No'}`);
+        console.log(`Direct links: ${meta.direct_count || 0}, Search links: ${meta.search_count || 0}`);
+    }
+    
     container.innerHTML = recommendations.map(rec => {
         const platform = (rec.platform || 'unknown').toLowerCase();
-        const duration = rec.duration_hours || rec.duration || '?';
-        const title = rec.title || 'Untitled Course';
-        const reason = rec.why_recommended || rec.reason || '';
-        const rating = rec.rating ? `<span>⭐ ${rec.rating}</span>` : '';
-        const price = rec.is_free ? '🆓 Free' : '💰 ' + (rec.price || 'Paid');
+        const duration = rec.duration_hours || rec.duration || null;
+        const title = rec.title || 'Recommended Course';
+        const description = rec.description || '';
+        const reason = rec.why_recommended || rec.reason || description || '';
+        const rating = rec.rating ? rec.rating.toFixed(1) : null;
+        const isFree = rec.is_free !== false && platform === 'youtube' ? true : rec.is_free;
+        const price = isFree ? '🆓 Free' : '💰 ' + (rec.price || 'Paid');
         const url = rec.url || '#';
+        const difficulty = rec.difficulty || state.currentLevel || 'beginner';
+        const urlType = rec.url_type || 'direct';
+        const source = rec.source || '';
+        
+        // Build meta info
+        let metaItems = [];
+        if (duration) metaItems.push(`<span>⏱️ ${duration}h</span>`);
+        metaItems.push(`<span>${price}</span>`);
+        if (rating) metaItems.push(`<span>⭐ ${rating}</span>`);
+        
+        // URL type badge - YouTube API verified is best, then direct, then search
+        let urlTypeBadge;
+        if (source === 'youtube_api') {
+            urlTypeBadge = '<span class="url-type-badge verified">✓ Verified</span>';
+        } else if (urlType === 'direct') {
+            urlTypeBadge = '<span class="url-type-badge direct">📚 Course</span>';
+        } else {
+            urlTypeBadge = '<span class="url-type-badge search">🔍 Search</span>';
+        }
+        
+        // Link text based on URL type
+        const linkText = urlType === 'direct' ? 'Open Course →' : 'View Search Results →';
+        
+        // Card class - verified links get special styling
+        const cardClass = source === 'youtube_api' ? 'verified-link' : 
+                         (urlType === 'direct' ? 'direct-link' : 'search-link');
         
         return `
-            <div class="recommendation-card">
-                <span class="platform-badge ${platform}">${platform}</span>
-                <h4>${title}</h4>
-                <div class="meta">
-                    <span>⏱️ ${duration}h</span>
-                    <span>${price}</span>
-                    ${rating}
+            <div class="recommendation-card ${cardClass}">
+                <div class="card-header">
+                    <span class="platform-badge ${platform}">${platform}</span>
+                    <span class="difficulty-badge ${difficulty}">${difficulty}</span>
+                    ${urlTypeBadge}
                 </div>
-                ${reason ? `<p class="reason">"${reason}"</p>` : ''}
-                <a href="${url}" target="_blank">View Course →</a>
+                <h4>${escapeHtml(title)}</h4>
+                <div class="meta">
+                    ${metaItems.join('')}
+                </div>
+                ${reason ? `<p class="reason">${escapeHtml(reason)}</p>` : ''}
+                <a href="${url}" target="_blank" rel="noopener noreferrer" class="view-link">${linkText}</a>
             </div>
         `;
     }).join('');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function renderPlaceholderRecommendations() {

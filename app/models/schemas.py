@@ -313,17 +313,35 @@ class ResourceRecommendation(BaseModel):
     title: str
     platform: Platform
     url: str
+    url_type: str = Field(default="direct", description="'direct' for course page, 'search' for search results")
     embed_url: Optional[str] = Field(None, description="Embeddable URL (for YouTube)")
-    topic_coverage: List[str]
+    topic_coverage: List[str] = Field(default_factory=list)
     difficulty: SkillLevel
     duration_hours: Optional[float] = None
     rating: Optional[float] = Field(None, ge=0, le=5)
     is_free: bool
     price: Optional[str] = None
+    source: Optional[str] = Field(None, description="Source: curated, gemini, resolved_curated, fallback_search")
     affiliate_link: Optional[str] = None
     snippet_start: Optional[int] = Field(None, description="Start time in seconds (YouTube)")
     snippet_end: Optional[int] = Field(None, description="End time in seconds (YouTube)")
     relevance_score: float = Field(..., description="How well it matches the learner profile")
+
+
+class RecommendationMeta(BaseModel):
+    """Metadata about the recommendation pipeline."""
+    skill: str
+    level: str
+    youtube_api_used: bool = Field(default=False, description="Whether YouTube Data API was used for verified videos")
+    curated_used: bool = Field(default=False, description="Whether curated direct links were used")
+    gemini_used: bool = Field(default=False, description="Whether Gemini provided valid recommendations")
+    resolved_curated_used: bool = Field(default=False, description="Whether Gemini suggestions were resolved to curated")
+    generic_curated_used: bool = Field(default=False, description="Whether generic direct resources were used")
+    search_fallback_used: bool = Field(default=False, description="Whether search fallbacks were needed")
+    direct_count: int = Field(default=0, description="Number of direct course links returned")
+    search_count: int = Field(default=0, description="Number of search URLs returned")
+    total_candidates: int = Field(default=0, description="Total candidates before filtering")
+    total_returned: int = Field(default=0, description="Final recommendations returned")
 
 
 class ResourceRecommendationResponse(BaseModel):
@@ -332,6 +350,7 @@ class ResourceRecommendationResponse(BaseModel):
     learner_level: SkillLevel
     recommendations: List[ResourceRecommendation]
     total_available: int
+    meta: Optional[RecommendationMeta] = Field(None, description="Pipeline metadata")
 
 
 # ============== Data Privacy Schemas ==============

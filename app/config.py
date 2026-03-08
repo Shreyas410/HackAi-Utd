@@ -21,6 +21,11 @@ class Settings(BaseSettings):
     # Gemini API key - required for production, optional for testing (uses mocks)
     gemini_api_key: Optional[str] = None
     
+    # YouTube Data API v3 key - for verified video links
+    # Get from: https://console.cloud.google.com/apis/credentials
+    # Free tier: 10,000 units/day (100 searches/day)
+    youtube_api_key: Optional[str] = None
+    
     # Session settings
     session_expiry_hours: int = 24
     

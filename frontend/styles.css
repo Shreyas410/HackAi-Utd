@@ -458,6 +458,64 @@ header h1 {
 .platform-badge.coursera { background: #dbeafe; color: #2563eb; }
 .platform-badge.udemy { background: #fef3c7; color: #d97706; }
 
+.recommendation-card .card-header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.difficulty-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.difficulty-badge.beginner { background: #dcfce7; color: #166534; }
+.difficulty-badge.intermediate { background: #fef3c7; color: #92400e; }
+.difficulty-badge.advanced { background: #fee2e2; color: #991b1b; }
+
+.url-type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: auto;
+}
+
+.url-type-badge.verified {
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+.url-type-badge.direct {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.url-type-badge.search {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.recommendation-card.verified-link {
+    border-left: 4px solid #3b82f6;
+    background: linear-gradient(90deg, #eff6ff 0%, white 10%);
+}
+
+.recommendation-card.direct-link {
+    border-left: 4px solid #10b981;
+}
+
+.recommendation-card.search-link {
+    border-left: 4px solid #9ca3af;
+}
+
 .recommendation-card h4 {
     margin-bottom: 8px;
     color: var(--text);

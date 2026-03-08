@@ -10,7 +10,7 @@ from typing import List, Optional
 
 from ..models.schemas import (
     ResourceRecommendationResponse, ResourceFilter, ResourceRecommendation,
-    SkillLevel, Platform, LearningModality
+    RecommendationMeta, SkillLevel, Platform, LearningModality
 )
 from ..models.database import get_db, Session as DBSession
 from ..services.recommendations import recommendation_service
@@ -92,8 +92,8 @@ async def get_resource_recommendations(
         modalities=preferred_modalities
     )
     
-    # Get recommendations
-    recommendations = recommendation_service.get_recommendations(
+    # Get recommendations using hybrid pipeline
+    recommendations, meta = recommendation_service.get_recommendations(
         skill=session.skill,
         level=level,
         filter_options=filter_options,
@@ -102,11 +102,28 @@ async def get_resource_recommendations(
         limit=limit
     )
     
+    # Build metadata response with verified-link-first pipeline info
+    recommendation_meta = RecommendationMeta(
+        skill=meta.get("skill", session.skill),
+        level=meta.get("level", level.value),
+        youtube_api_used=meta.get("youtube_api_used", False),
+        curated_used=meta.get("curated_used", False),
+        gemini_used=meta.get("gemini_used", False),
+        resolved_curated_used=meta.get("resolved_curated_used", False),
+        generic_curated_used=meta.get("generic_curated_used", False),
+        search_fallback_used=meta.get("search_fallback_used", False),
+        direct_count=meta.get("direct_count", 0),
+        search_count=meta.get("search_count", 0),
+        total_candidates=meta.get("total_candidates", 0),
+        total_returned=meta.get("total_returned", len(recommendations))
+    )
+    
     return ResourceRecommendationResponse(
         session_id=session_id,
         learner_level=level,
         recommendations=recommendations,
-        total_available=len(recommendations)
+        total_available=len(recommendations),
+        meta=recommendation_meta
     )
 
 
@@ -122,55 +139,49 @@ async def browse_all_resources(
     Browse the resource catalog without a session.
     
     This endpoint allows exploring available resources without
-    requiring a learning session.
+    requiring a learning session. Uses the hybrid pipeline
+    to generate recommendations for the specified skill.
     
     Args:
-        skill: Optional skill filter
+        skill: Skill to get resources for (required for meaningful results)
         platform: Optional platform filter (youtube, coursera, udemy)
-        difficulty: Optional difficulty filter
+        difficulty: Optional difficulty filter (defaults to beginner)
         free_only: Only return free resources
         limit: Maximum results to return
     
     Returns:
         List of resources matching the filters
     """
-    # Get all resources with basic filtering
-    all_resources = recommendation_service._resources
+    # Default skill if not provided
+    target_skill = skill or "programming"
+    target_level = difficulty or SkillLevel.BEGINNER
     
-    filtered = all_resources
+    # Build filter
+    filter_options = ResourceFilter(
+        session_id="catalog",
+        platforms=[platform] if platform else None,
+        free_only=free_only
+    )
     
-    if skill:
-        skill_lower = skill.lower()
-        filtered = [
-            r for r in filtered
-            if any(skill_lower in s.lower() for s in r.get("skills", []))
-        ]
-    
-    if platform:
-        filtered = [r for r in filtered if r.get("platform") == platform.value]
-    
-    if difficulty:
-        filtered = [r for r in filtered if r.get("difficulty") == difficulty.value]
-    
-    if free_only:
-        filtered = [r for r in filtered if r.get("is_free", False)]
-    
-    # Convert to recommendations
-    results = []
-    for r in filtered[:limit]:
-        rec = recommendation_service._to_recommendation(r, 0.5)
-        results.append(rec)
+    # Get recommendations using hybrid pipeline
+    recommendations, meta = recommendation_service.get_recommendations(
+        skill=target_skill,
+        level=target_level,
+        filter_options=filter_options,
+        limit=limit
+    )
     
     return {
-        "resources": [r.model_dump() for r in results],
-        "total": len(filtered),
-        "returned": len(results),
+        "resources": [r.model_dump() for r in recommendations],
+        "total": meta.get("total_candidates", len(recommendations)),
+        "returned": len(recommendations),
         "filters_applied": {
-            "skill": skill,
+            "skill": target_skill,
             "platform": platform.value if platform else None,
-            "difficulty": difficulty.value if difficulty else None,
+            "difficulty": target_level.value if target_level else None,
             "free_only": free_only
-        }
+        },
+        "meta": meta
     }
 
 

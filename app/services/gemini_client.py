@@ -154,69 +154,217 @@ If data is ambiguous, lean toward the lower level to ensure appropriate content 
         num_recommendations: int = 5
     ) -> List[Dict[str, Any]]:
         """
-        Ask Gemini to recommend personalized courses from YouTube, Coursera, or Udemy.
+        Ask Gemini to recommend courses with DIRECT URLs when possible.
         
-        Returns structured recommendations with title, platform, difficulty,
-        duration, free/paid status, and links.
+        Gemini should return actual course/video URLs, not search URLs.
+        If Gemini is unsure about a URL, it should omit it rather than hallucinate.
         """
-        modalities_str = ", ".join(preferred_modalities) if preferred_modalities else "video, interactive"
+        modalities_str = ", ".join(preferred_modalities) if preferred_modalities else "video"
         interests_str = f"\nSpecific interests: {interests}" if interests else ""
         
-        prompt = f"""You are an expert learning advisor. Recommend exactly {num_recommendations} high-quality, REAL courses for learning "{skill}" at the {level.upper()} level.
+        prompt = f"""You are an expert learning advisor. Recommend exactly {num_recommendations} REAL courses for "{skill}" at the {level.upper()} level.
 
 === LEARNER PROFILE ===
-- Skill to learn: {skill}
-- Current level: {level}
-- Preferred learning styles: {modalities_str}{interests_str}
+- Skill: {skill}
+- Level: {level}
+- Preferred formats: {modalities_str}{interests_str}
 
-=== CONSTRAINTS ===
-- ONLY recommend from: YouTube, Coursera, Udemy
-- Recommend REAL, EXISTING courses that you know exist
-- Match recommendations to the learner's {level} level
-- Include a variety: some free, some paid
-- Prioritize highly-rated, popular courses with good reviews
-- Each recommendation should serve a different learning purpose
+=== CRITICAL REQUIREMENTS ===
+1. ONLY platforms: youtube, coursera, udemy
+2. Prefer REAL, EXISTING courses you are confident about
+3. If you know the actual URL, include it
+4. If you are NOT confident about a URL, OMIT the url field entirely
+5. NEVER hallucinate or make up fake URLs
+6. Include query field as backup for finding the resource
 
-=== RECOMMENDATION VARIETY ===
-For a {level} learner, include:
-- Foundational courses to build core knowledge
-- Practical/project-based courses for hands-on experience
-- Quick tutorials for specific topics
-- Comprehensive courses for deep learning
+=== OUTPUT FORMAT ===
+Return ONLY valid JSON array. NO markdown. NO explanation.
 
-=== PLATFORM NOTES ===
-- YouTube: Free tutorials. Include channel name. For playlists, note total videos.
-- Coursera: University/company courses. Many offer "free audit" option.
-- Udemy: Often $12-20 on sale. Include instructor name if well-known.
+Each item MUST have:
+- "title": exact or close course/video title
+- "platform": "youtube" or "coursera" or "udemy"
+- "description": brief description
+- "reason": why good for {level} learner
+- "difficulty": "{level}"
+- "query": search terms to find this (always include)
 
-=== REQUIRED OUTPUT FORMAT ===
-Respond ONLY with valid JSON array (no markdown, no explanation):
+Each item SHOULD have (if you are confident):
+- "url": DIRECT URL to the course/video (NOT a search URL)
+
+=== URL GUIDELINES ===
+YouTube: https://www.youtube.com/watch?v=VIDEO_ID
+Coursera: https://www.coursera.org/learn/COURSE-NAME
+Udemy: https://www.udemy.com/course/COURSE-NAME/
+
+DO NOT return search result URLs like:
+- youtube.com/results?search_query=
+- coursera.org/search?query=
+- udemy.com/courses/search/
+
+=== EXAMPLE OUTPUT ===
 [
-    {{
-        "title": "<exact real course/video title>",
-        "platform": "youtube" | "coursera" | "udemy",
-        "url": "<actual URL - use real URLs you know>",
-        "instructor": "<instructor or channel name>",
-        "difficulty": "beginner" | "intermediate" | "advanced",
-        "duration_hours": <estimated hours as number>,
-        "is_free": <true if free, false if paid>,
-        "price": "<Free, or price like '$49/month', '$19.99 on sale'>",
-        "rating": <rating 1-5 as float, or null>,
-        "why_recommended": "<personalized reason why this specific course helps a {level} learner of {skill}>"
-    }}
+  {{
+    "title": "Node.js Tutorial for Beginners",
+    "platform": "youtube",
+    "url": "https://www.youtube.com/watch?v=TlB_eWDSMt4",
+    "query": "nodejs tutorial beginners mosh",
+    "description": "1-hour intro to Node.js fundamentals",
+    "reason": "Popular beginner-friendly Node tutorial",
+    "difficulty": "beginner"
+  }},
+  {{
+    "title": "Python for Everybody",
+    "platform": "coursera",
+    "url": "https://www.coursera.org/specializations/python",
+    "query": "python for everybody coursera",
+    "description": "University of Michigan Python specialization",
+    "reason": "Most popular Python course on Coursera",
+    "difficulty": "beginner"
+  }},
+  {{
+    "title": "Web Development Course",
+    "platform": "udemy",
+    "query": "complete web development bootcamp",
+    "description": "Full-stack web development",
+    "reason": "Comprehensive web dev training",
+    "difficulty": "beginner"
+  }}
 ]
 
-IMPORTANT: Only recommend courses you are confident actually exist. Use real course names and instructors."""
+Return {num_recommendations} recommendations as JSON:"""
 
         try:
             response = self.model.generate_content(prompt)
-            result = self._parse_json_response(response.text)
+            raw_text = response.text
             
-            if isinstance(result, list):
-                return result
-            return []
+            print(f"[Gemini] Raw recommendation response length: {len(raw_text)}")
+            
+            result = self._parse_gemini_recommendations(raw_text)
+            return result
+            
         except Exception as e:
-            raise RuntimeError(f"Gemini recommendation failed: {e}")
+            print(f"[Gemini] Recommendation failed: {e}")
+            return []
+    
+    def _parse_gemini_recommendations(self, raw_text: str) -> List[Dict[str, Any]]:
+        """
+        Parse and validate Gemini recommendation response.
+        Handles malformed JSON, code fences, and validates URLs.
+        """
+        try:
+            parsed = self._parse_json_response(raw_text)
+            
+            if not isinstance(parsed, list):
+                print(f"[Gemini] Expected list, got {type(parsed)}")
+                return []
+            
+            valid_recommendations = []
+            for item in parsed:
+                if not isinstance(item, dict):
+                    continue
+                
+                platform = item.get("platform", "").lower()
+                if platform not in ["youtube", "coursera", "udemy"]:
+                    print(f"[Gemini] Rejected invalid platform: {platform}")
+                    continue
+                
+                title = item.get("title", "")
+                query = item.get("query", "")
+                url = item.get("url", "")
+                
+                if not title and not query:
+                    print(f"[Gemini] Rejected: missing both title and query")
+                    continue
+                
+                # Validate URL if provided - reject search URLs
+                if url:
+                    url_lower = url.lower()
+                    is_search_url = any(p in url_lower for p in [
+                        "/results?search_query=",
+                        "/search?",
+                        "/courses/search/"
+                    ])
+                    if is_search_url:
+                        print(f"[Gemini] Rejecting search URL: {url[:50]}")
+                        url = ""  # Clear invalid search URL
+                
+                valid_recommendations.append({
+                    "title": title or f"Recommended {platform.title()} Resource",
+                    "platform": platform,
+                    "query": query,
+                    "url": url,
+                    "description": item.get("description", ""),
+                    "reason": item.get("reason", item.get("why_recommended", "")),
+                    "difficulty": item.get("difficulty", "intermediate").lower(),
+                    "is_free": item.get("is_free", platform == "youtube"),
+                    "duration_hours": item.get("duration_hours"),
+                    "rating": item.get("rating"),
+                    "source": "gemini"
+                })
+            
+            print(f"[Gemini] Parsed {len(valid_recommendations)} valid recommendations")
+            return valid_recommendations
+            
+        except Exception as e:
+            print(f"[Gemini] Parse error: {e}")
+            return []
+    
+    def generate_youtube_search_queries(
+        self,
+        skill: str,
+        level: str,
+        num_queries: int = 3
+    ) -> List[str]:
+        """
+        Generate optimized YouTube search queries for a skill and level.
+        
+        Instead of asking Gemini for video URLs (which it hallucinates),
+        we ask it to generate optimal search queries that we'll use
+        with the YouTube Data API.
+        
+        Returns a list of search query strings.
+        """
+        prompt = f"""You are a YouTube search expert. Generate {num_queries} optimal search queries to find the best educational videos for learning "{skill}" at the {level.upper()} level.
+
+=== REQUIREMENTS ===
+- Each query should find DIFFERENT types of content (tutorial, course, crash course, project-based, etc.)
+- Queries should be specific enough to find relevant videos
+- Include level-appropriate terms (beginner/intermediate/advanced)
+- Use keywords that popular educational channels use
+
+=== OUTPUT FORMAT ===
+Return ONLY a JSON array of strings. No markdown, no explanation:
+["query 1", "query 2", "query 3"]
+
+=== EXAMPLES ===
+For "Python" at "beginner" level:
+["python tutorial for beginners complete course", "learn python programming basics 2024", "python crash course absolute beginners"]
+
+For "React" at "intermediate" level:
+["react hooks tutorial projects", "react advanced patterns best practices", "build react app intermediate tutorial"]
+
+Generate {num_queries} queries for "{skill}" at "{level}" level:"""
+
+        try:
+            response = self.model.generate_content(prompt)
+            raw_text = response.text
+            
+            # Parse the JSON array
+            queries = self._parse_json_response(raw_text)
+            
+            if isinstance(queries, list):
+                # Filter to only string queries
+                valid_queries = [q for q in queries if isinstance(q, str) and len(q) > 5]
+                if valid_queries:
+                    print(f"[Gemini] Generated {len(valid_queries)} YouTube search queries")
+                    return valid_queries[:num_queries]
+            
+            print(f"[Gemini] Failed to parse search queries, using fallback")
+            return []
+            
+        except Exception as e:
+            print(f"[Gemini] Search query generation failed: {e}")
+            return []
     
     def interpret_quiz_answer(
         self,
@@ -342,6 +490,10 @@ Respond ONLY with a valid JSON array:
     def _parse_json_response(self, text: str) -> Any:
         """Extract and parse JSON from Gemini response."""
         import re
+        
+        if not text:
+            raise ValueError("Empty response from Gemini")
+        
         text = text.strip()
         
         # Remove markdown code blocks (```json ... ``` or ``` ... ```)
@@ -350,26 +502,55 @@ Respond ONLY with a valid JSON array:
         if code_match:
             text = code_match.group(1).strip()
         
+        # Clean up common issues
+        text = text.replace('\r\n', '\n').replace('\r', '\n')
+        
         # Try direct parse first
         try:
             return json.loads(text)
         except json.JSONDecodeError:
             pass
         
-        # Try to find JSON in the response
-        start_markers = ['{', '[']
-        end_markers = {'{': '}', '[': ']'}
+        # Try to find and extract JSON array or object
+        start_markers = ['[', '{']
+        end_markers = {'[': ']', '{': '}'}
         
         for start_marker in start_markers:
             start = text.find(start_marker)
             if start >= 0:
                 end_marker = end_markers[start_marker]
-                end = text.rfind(end_marker)
-                if end > start:
-                    json_str = text[start:end + 1]
+                # Find matching bracket by counting
+                depth = 0
+                in_string = False
+                escape_next = False
+                end_pos = -1
+                
+                for i, char in enumerate(text[start:], start):
+                    if escape_next:
+                        escape_next = False
+                        continue
+                    if char == '\\':
+                        escape_next = True
+                        continue
+                    if char == '"' and not escape_next:
+                        in_string = not in_string
+                        continue
+                    if in_string:
+                        continue
+                    if char == start_marker:
+                        depth += 1
+                    elif char == end_marker:
+                        depth -= 1
+                        if depth == 0:
+                            end_pos = i
+                            break
+                
+                if end_pos > start:
+                    json_str = text[start:end_pos + 1]
                     try:
                         return json.loads(json_str)
-                    except json.JSONDecodeError:
+                    except json.JSONDecodeError as e:
+                        print(f"[Gemini] JSON parse attempt failed: {e}")
                         continue
         
         raise ValueError(f"Could not parse JSON from response: {text[:200]}")
@@ -472,8 +653,8 @@ class MockGeminiClient(GeminiClientBase):
         num_recommendations: int = 5
     ) -> List[Dict[str, Any]]:
         """
-        Return mock course recommendations based on skill and level.
-        Recommendations are differentiated by skill level.
+        Return mock course recommendations with DIRECT URLs when available.
+        Simulates real Gemini behavior - sometimes has URLs, sometimes only queries.
         """
         self.call_log.append({
             "method": "get_course_recommendations",
@@ -485,235 +666,205 @@ class MockGeminiClient(GeminiClientBase):
         if "recommendations" in self.custom_responses:
             return self.custom_responses["recommendations"]
         
-        import urllib.parse
-        skill_encoded = urllib.parse.quote_plus(skill)
         skill_title = skill.title()
+        skill_lower = skill.lower()
         
-        # Use SEARCH URLs that are 100% GUARANTEED to work
-        # These show search results, not specific videos/courses that might be deleted
-        
+        # Mock recommendations with some direct URLs, some without
+        # This simulates realistic Gemini behavior
         beginner_recommendations = [
             {
-                "title": f"{skill_title} Beginner Tutorial - Full Course",
+                "title": f"{skill_title} Tutorial for Beginners",
                 "platform": "youtube",
-                "url": f"https://www.youtube.com/results?search_query={skill_encoded}+beginner+tutorial+full+course",
-                "instructor": "Various Creators",
+                "url": "https://www.youtube.com/watch?v=PkZNo7MFNFg",  # Real URL example
+                "query": f"{skill_lower} tutorial beginner complete",
+                "description": f"Comprehensive beginner tutorial for {skill}",
+                "reason": f"Perfect starting point for learning {skill}",
                 "difficulty": "beginner",
-                "duration_hours": 4,
                 "is_free": True,
-                "price": "Free",
-                "rating": 4.8,
-                "why_recommended": f"Search results for best {skill} beginner tutorials - pick the most viewed one"
+                "source": "gemini"
             },
             {
-                "title": f"{skill_title} Crash Course for Beginners",
+                "title": f"{skill_title} Crash Course",
                 "platform": "youtube",
-                "url": f"https://www.youtube.com/results?search_query={skill_encoded}+crash+course+beginners+2024",
-                "instructor": "Various Creators",
+                "query": f"{skill_lower} crash course basics",
+                "description": f"Quick introduction to {skill} essentials",
+                "reason": "Fast-paced overview to get started quickly",
                 "difficulty": "beginner",
-                "duration_hours": 2,
                 "is_free": True,
-                "price": "Free",
-                "rating": 4.7,
-                "why_recommended": "Quick crash courses to get started fast - sorted by relevance"
+                "source": "gemini"
             },
             {
-                "title": f"{skill_title} for Beginners - Coursera",
+                "title": f"{skill_title} Specialization",
                 "platform": "coursera",
-                "url": f"https://www.coursera.org/search?query={skill_encoded}&productDifficultyLevel=Beginner",
-                "instructor": "Top Universities",
+                "url": "https://www.coursera.org/specializations/python",  # Example
+                "query": f"{skill_lower} specialization beginner",
+                "description": f"University-backed {skill} course",
+                "reason": "Structured curriculum with certification",
                 "difficulty": "beginner",
-                "duration_hours": 40,
                 "is_free": False,
-                "price": "Free to audit, $49/month for certificate",
-                "rating": 4.7,
-                "why_recommended": f"University-backed {skill} courses filtered for beginners"
+                "source": "gemini"
             },
             {
-                "title": f"{skill_title} Complete Bootcamp - Udemy",
+                "title": f"Complete {skill_title} Bootcamp",
                 "platform": "udemy",
-                "url": f"https://www.udemy.com/courses/search/?q={skill_encoded}&instructional_level=beginner&sort=relevance&ratings=4.0",
-                "instructor": "Top Instructors",
+                "query": f"{skill_lower} bootcamp complete beginner",
+                "description": f"Comprehensive {skill} bootcamp",
+                "reason": "Hands-on learning with projects",
                 "difficulty": "beginner",
-                "duration_hours": 30,
                 "is_free": False,
-                "price": "$14.99 (frequently on sale)",
-                "rating": 4.6,
-                "why_recommended": f"Highly-rated {skill} courses for beginners with lifetime access"
+                "source": "gemini"
             },
             {
-                "title": f"Learn {skill_title} Step by Step",
+                "title": f"Learn {skill_title} - Full Course",
                 "platform": "youtube",
-                "url": f"https://www.youtube.com/results?search_query=learn+{skill_encoded}+step+by+step+tutorial",
-                "instructor": "Various Creators",
+                "url": "https://www.youtube.com/watch?v=rfscVS0vtbw",
+                "query": f"learn {skill_lower} full course",
+                "description": f"Complete {skill} course",
+                "reason": "Comprehensive free tutorial",
                 "difficulty": "beginner",
-                "duration_hours": 3,
                 "is_free": True,
-                "price": "Free",
-                "rating": 4.8,
-                "why_recommended": "Step-by-step tutorials perfect for absolute beginners"
+                "source": "gemini"
             },
             {
-                "title": f"{skill_title} Fundamentals Course",
+                "title": f"{skill_title} Fundamentals",
                 "platform": "coursera",
-                "url": f"https://www.coursera.org/search?query={skill_encoded}+fundamentals",
-                "instructor": "Industry Experts",
+                "query": f"{skill_lower} fundamentals introduction",
+                "description": f"Core {skill} concepts",
+                "reason": "Solid foundation building",
                 "difficulty": "beginner",
-                "duration_hours": 20,
                 "is_free": False,
-                "price": "Free to audit",
-                "rating": 4.6,
-                "why_recommended": f"Build strong {skill} foundations with structured learning"
+                "source": "gemini"
             }
         ]
         
         intermediate_recommendations = [
             {
-                "title": f"{skill_title} Projects Tutorial",
+                "title": f"{skill_title} Projects Course",
                 "platform": "youtube",
-                "url": f"https://www.youtube.com/results?search_query={skill_encoded}+project+tutorial+intermediate",
-                "instructor": "Various Creators",
+                "url": "https://www.youtube.com/watch?v=Oe421EPjeBE",
+                "query": f"{skill_lower} projects tutorial",
+                "description": f"Build real {skill} projects",
+                "reason": "Learn by building applications",
                 "difficulty": "intermediate",
-                "duration_hours": 5,
                 "is_free": True,
-                "price": "Free",
-                "rating": 4.9,
-                "why_recommended": f"Build real {skill} projects to solidify your skills"
+                "source": "gemini"
             },
             {
                 "title": f"Advanced {skill_title} Concepts",
                 "platform": "youtube",
-                "url": f"https://www.youtube.com/results?search_query={skill_encoded}+advanced+concepts+tutorial",
-                "instructor": "Various Creators",
+                "query": f"{skill_lower} advanced concepts",
+                "description": f"Deep dive into {skill}",
+                "reason": "Master advanced patterns",
                 "difficulty": "intermediate",
-                "duration_hours": 4,
                 "is_free": True,
-                "price": "Free",
-                "rating": 4.8,
-                "why_recommended": "Deep dive into advanced concepts and techniques"
+                "source": "gemini"
             },
             {
                 "title": f"{skill_title} Professional Certificate",
                 "platform": "coursera",
-                "url": f"https://www.coursera.org/search?query={skill_encoded}&productDifficultyLevel=Intermediate&productTypeDescription=Professional%20Certificates",
-                "instructor": "Google, IBM, Meta",
+                "url": "https://www.coursera.org/professional-certificates/google-it-support",
+                "query": f"{skill_lower} professional certificate",
+                "description": f"Industry certification for {skill}",
+                "reason": "Career advancement credential",
                 "difficulty": "intermediate",
-                "duration_hours": 80,
                 "is_free": False,
-                "price": "$49/month (7-day free trial)",
-                "rating": 4.8,
-                "why_recommended": "Industry-recognized professional certificates"
+                "source": "gemini"
             },
             {
-                "title": f"{skill_title} Real World Projects - Udemy",
+                "title": f"{skill_title} Complete Guide",
                 "platform": "udemy",
-                "url": f"https://www.udemy.com/courses/search/?q={skill_encoded}+projects&instructional_level=intermediate&sort=relevance&ratings=4.0",
-                "instructor": "Senior Developers",
+                "url": "https://www.udemy.com/course/the-complete-javascript-course/",
+                "query": f"{skill_lower} complete guide",
+                "description": f"In-depth {skill} course",
+                "reason": "Comprehensive training",
                 "difficulty": "intermediate",
-                "duration_hours": 40,
                 "is_free": False,
-                "price": "$16.99 (frequently on sale)",
-                "rating": 4.7,
-                "why_recommended": f"Hands-on {skill} projects for real-world experience"
+                "source": "gemini"
             },
             {
                 "title": f"{skill_title} Best Practices",
                 "platform": "youtube",
-                "url": f"https://www.youtube.com/results?search_query={skill_encoded}+best+practices+tips",
-                "instructor": "Various Creators",
+                "query": f"{skill_lower} best practices",
+                "description": f"Professional {skill} techniques",
+                "reason": "Industry best practices",
                 "difficulty": "intermediate",
-                "duration_hours": 3,
                 "is_free": True,
-                "price": "Free",
-                "rating": 4.7,
-                "why_recommended": "Learn industry best practices and common patterns"
+                "source": "gemini"
             },
             {
-                "title": f"{skill_title} Intermediate Specialization",
+                "title": f"{skill_title} Deep Dive",
                 "platform": "coursera",
-                "url": f"https://www.coursera.org/search?query={skill_encoded}&productDifficultyLevel=Intermediate",
-                "instructor": "Top Universities",
+                "query": f"{skill_lower} in depth intermediate",
+                "description": f"Thorough {skill} coverage",
+                "reason": "Comprehensive understanding",
                 "difficulty": "intermediate",
-                "duration_hours": 60,
                 "is_free": False,
-                "price": "Free to audit",
-                "rating": 4.6,
-                "why_recommended": "Comprehensive intermediate-level specializations"
+                "source": "gemini"
             }
         ]
         
         advanced_recommendations = [
             {
-                "title": f"{skill_title} System Design & Architecture",
+                "title": f"{skill_title} System Design",
                 "platform": "youtube",
-                "url": f"https://www.youtube.com/results?search_query={skill_encoded}+system+design+architecture",
-                "instructor": "Various Creators",
+                "url": "https://www.youtube.com/watch?v=bUHFg8CZFws",
+                "query": f"{skill_lower} system design architecture",
+                "description": f"Enterprise {skill} architecture",
+                "reason": "Scale applications properly",
                 "difficulty": "advanced",
-                "duration_hours": 8,
                 "is_free": True,
-                "price": "Free",
-                "rating": 4.9,
-                "why_recommended": "Learn to architect scalable systems"
+                "source": "gemini"
             },
             {
                 "title": f"{skill_title} Performance Optimization",
                 "platform": "youtube",
-                "url": f"https://www.youtube.com/results?search_query={skill_encoded}+performance+optimization+advanced",
-                "instructor": "Various Creators",
+                "query": f"{skill_lower} performance optimization",
+                "description": f"Optimize {skill} applications",
+                "reason": "Performance tuning mastery",
                 "difficulty": "advanced",
-                "duration_hours": 6,
                 "is_free": True,
-                "price": "Free",
-                "rating": 4.8,
-                "why_recommended": "Advanced performance tuning and optimization techniques"
+                "source": "gemini"
             },
             {
-                "title": f"{skill_title} Advanced Specialization",
+                "title": f"Advanced {skill_title} Specialization",
                 "platform": "coursera",
-                "url": f"https://www.coursera.org/search?query={skill_encoded}&productDifficultyLevel=Advanced&productTypeDescription=Specializations",
-                "instructor": "Stanford, MIT, etc.",
+                "url": "https://www.coursera.org/specializations/deep-learning",
+                "query": f"{skill_lower} advanced specialization",
+                "description": f"Expert {skill} training",
+                "reason": "Advanced certification",
                 "difficulty": "advanced",
-                "duration_hours": 60,
                 "is_free": False,
-                "price": "$49/month",
-                "rating": 4.8,
-                "why_recommended": "Advanced specializations from world-class universities"
+                "source": "gemini"
             },
             {
-                "title": f"{skill_title} Expert Masterclass - Udemy",
+                "title": f"{skill_title} Expert Masterclass",
                 "platform": "udemy",
-                "url": f"https://www.udemy.com/courses/search/?q={skill_encoded}+advanced&instructional_level=expert&sort=relevance&ratings=4.5",
-                "instructor": "Industry Experts",
+                "query": f"{skill_lower} masterclass expert",
+                "description": f"Production-grade {skill}",
+                "reason": "Industry veteran insights",
                 "difficulty": "advanced",
-                "duration_hours": 50,
                 "is_free": False,
-                "price": "$19.99 (frequently on sale)",
-                "rating": 4.7,
-                "why_recommended": f"Expert-level {skill} courses for production-ready skills"
+                "source": "gemini"
             },
             {
-                "title": f"{skill_title} Interview Preparation",
+                "title": f"{skill_title} Interview Prep",
                 "platform": "youtube",
-                "url": f"https://www.youtube.com/results?search_query={skill_encoded}+interview+questions+senior",
-                "instructor": "Various Creators",
+                "query": f"{skill_lower} interview preparation senior questions",
+                "description": f"Ace {skill} technical interviews",
+                "reason": "Prepare for senior-level interviews",
                 "difficulty": "advanced",
-                "duration_hours": 4,
                 "is_free": True,
-                "price": "Free",
-                "rating": 4.8,
-                "why_recommended": "Prepare for senior-level technical interviews"
+                "source": "gemini"
             },
             {
                 "title": f"{skill_title} Production Best Practices",
                 "platform": "coursera",
-                "url": f"https://www.coursera.org/search?query={skill_encoded}+production+enterprise",
-                "instructor": "Tech Companies",
+                "query": f"{skill_lower} production enterprise best practices",
+                "description": f"Enterprise-grade {skill} practices",
+                "reason": "Learn production-ready techniques",
                 "difficulty": "advanced",
-                "duration_hours": 40,
                 "is_free": False,
-                "price": "Free to audit",
-                "rating": 4.6,
-                "why_recommended": "Enterprise-grade practices for production environments"
+                "source": "gemini"
             }
         ]
         
@@ -726,6 +877,37 @@ class MockGeminiClient(GeminiClientBase):
             recommendations = advanced_recommendations
         
         return recommendations[:num_recommendations]
+    
+    def generate_youtube_search_queries(
+        self,
+        skill: str,
+        level: str,
+        num_queries: int = 3
+    ) -> List[str]:
+        """
+        Generate mock YouTube search queries for testing.
+        """
+        self.call_log.append({
+            "method": "generate_youtube_search_queries",
+            "skill": skill,
+            "level": level,
+            "num_queries": num_queries
+        })
+        
+        if "youtube_queries" in self.custom_responses:
+            return self.custom_responses["youtube_queries"]
+        
+        skill_lower = skill.lower()
+        level_lower = level.lower()
+        
+        # Generate realistic search queries
+        queries = [
+            f"{skill_lower} tutorial for {level_lower}s complete course",
+            f"learn {skill_lower} {level_lower} programming",
+            f"{skill_lower} crash course {level_lower}"
+        ]
+        
+        return queries[:num_queries]
     
     def interpret_quiz_answer(
         self,

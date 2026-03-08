@@ -31,12 +31,10 @@ logger = logging.getLogger(__name__)
 
 
 PLATFORM_DOMAINS = {
-    "youtube": ["youtube.com", "youtu.be"],
-    "coursera": ["coursera.org"],
-    "udemy": ["udemy.com"]
+    "youtube": ["youtube.com", "youtu.be"]
 }
 
-SUPPORTED_PLATFORMS = {"youtube", "coursera", "udemy"}
+SUPPORTED_PLATFORMS = {"youtube"}
 
 
 @dataclass
@@ -680,12 +678,12 @@ class RecommendationService:
         if len(candidates) <= limit:
             return candidates
         
-        # Separate by url_type first, then by platform
+        # Separate by url_type first
         direct_by_platform: Dict[str, List[RecommendationCandidate]] = {
-            "youtube": [], "coursera": [], "udemy": []
+            "youtube": []
         }
         search_by_platform: Dict[str, List[RecommendationCandidate]] = {
-            "youtube": [], "coursera": [], "udemy": []
+            "youtube": []
         }
         
         for c in candidates:
@@ -697,8 +695,8 @@ class RecommendationService:
         
         result = []
         
-        # First pass: Add direct links from each platform
-        for platform in ["youtube", "coursera", "udemy"]:
+        # First pass: Add direct links from YouTube
+        for platform in ["youtube"]:
             if direct_by_platform[platform] and len(result) < limit:
                 result.append(direct_by_platform[platform].pop(0))
         
@@ -715,7 +713,7 @@ class RecommendationService:
         
         # Third pass: Only use search fallbacks if we still need more
         if len(result) < limit:
-            for platform in ["youtube", "coursera", "udemy"]:
+            for platform in ["youtube"]:
                 if search_by_platform[platform] and len(result) < limit:
                     result.append(search_by_platform[platform].pop(0))
         
@@ -812,7 +810,7 @@ class RecommendationService:
         
         # 5. Add search fallbacks only if still short
         if len(candidates) < limit:
-            platforms = ["youtube", "coursera", "udemy"]
+            platforms = ["youtube"]
             for i, platform in enumerate(platforms * 2):
                 if len(candidates) >= limit * 2:
                     break

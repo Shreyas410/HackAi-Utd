@@ -1,17 +1,16 @@
 """
-Curated direct-link course recommendations.
+Curated YouTube video recommendations.
 
-This is a SMALL, maintainable database of actual course URLs.
-Each entry contains a DIRECT link to a real course/video, not a search URL.
+This is a SMALL, maintainable database of actual YouTube video URLs.
+Each entry contains a DIRECT link to a real video, not a search URL.
 
-Priority: Direct course URLs > Search fallbacks
+Platform: YouTube only
 """
 
 from typing import Dict, List, Any, Optional
 
 
-# Curated direct-link resources for common skills
-# Each entry has: title, platform, url, resource_type, description, reason, is_free
+# Curated YouTube video resources for common skills
 CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
     
     # ==================== NODE.JS ====================
@@ -36,16 +35,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Comprehensive beginner course with hands-on projects",
                 "is_free": True,
                 "duration_hours": 7
-            },
-            {
-                "title": "Server-side Development with NodeJS, Express and MongoDB",
-                "platform": "coursera",
-                "url": "https://www.coursera.org/learn/server-side-nodejs",
-                "resource_type": "course",
-                "description": "Hong Kong University course on Node.js backend development",
-                "reason": "University-backed structured curriculum",
-                "is_free": False,
-                "duration_hours": 50
             }
         ],
         "intermediate": [
@@ -58,16 +47,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Deep dive into Express framework and REST APIs",
                 "is_free": True,
                 "duration_hours": 8
-            },
-            {
-                "title": "Node.js, Express, MongoDB & More: The Complete Bootcamp",
-                "platform": "udemy",
-                "url": "https://www.udemy.com/course/nodejs-express-mongodb-bootcamp/",
-                "resource_type": "course",
-                "description": "Jonas Schmedtmann's comprehensive Node.js bootcamp",
-                "reason": "Industry-standard bootcamp with real-world projects",
-                "is_free": False,
-                "duration_hours": 42
             }
         ],
         "advanced": [
@@ -136,16 +115,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Quick intro to MongoDB basics and CRUD operations",
                 "is_free": True,
                 "duration_hours": 1.5
-            },
-            {
-                "title": "MongoDB University: M001 MongoDB Basics",
-                "platform": "coursera",
-                "url": "https://www.coursera.org/learn/introduction-mongodb",
-                "resource_type": "course",
-                "description": "Official MongoDB University basics course",
-                "reason": "Official MongoDB certification path",
-                "is_free": False,
-                "duration_hours": 20
             }
         ],
         "intermediate": [
@@ -178,7 +147,7 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
     "react": {
         "beginner": [
             {
-                "title": "React Course - Beginner's Tutorial for React JavaScript Library [2022]",
+                "title": "React Course - Beginner's Tutorial for React JavaScript Library",
                 "platform": "youtube",
                 "url": "https://www.youtube.com/watch?v=bMknfKXIFA8",
                 "resource_type": "video",
@@ -186,26 +155,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Comprehensive beginner course with modern React",
                 "is_free": True,
                 "duration_hours": 12
-            },
-            {
-                "title": "React - The Complete Guide 2024",
-                "platform": "udemy",
-                "url": "https://www.udemy.com/course/react-the-complete-guide-incl-redux/",
-                "resource_type": "course",
-                "description": "Maximilian Schwarzmüller's comprehensive React course",
-                "reason": "Industry standard React bootcamp with Redux",
-                "is_free": False,
-                "duration_hours": 68
-            },
-            {
-                "title": "Front-End Web Development with React",
-                "platform": "coursera",
-                "url": "https://www.coursera.org/learn/front-end-react",
-                "resource_type": "course",
-                "description": "Hong Kong University React course",
-                "reason": "University-backed React curriculum",
-                "is_free": False,
-                "duration_hours": 45
             }
         ],
         "intermediate": [
@@ -266,16 +215,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Comprehensive JS basics",
                 "is_free": True,
                 "duration_hours": 3.5
-            },
-            {
-                "title": "The Complete JavaScript Course 2024",
-                "platform": "udemy",
-                "url": "https://www.udemy.com/course/the-complete-javascript-course/",
-                "resource_type": "course",
-                "description": "Jonas Schmedtmann's JS masterclass",
-                "reason": "Most popular JavaScript course",
-                "is_free": False,
-                "duration_hours": 69
             }
         ],
         "intermediate": [
@@ -302,14 +241,14 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
         ],
         "advanced": [
             {
-                "title": "JavaScript: Understanding the Weird Parts",
-                "platform": "udemy",
-                "url": "https://www.udemy.com/course/understand-javascript/",
-                "resource_type": "course",
-                "description": "Deep dive into JS internals",
-                "reason": "Understand how JS works under the hood",
-                "is_free": False,
-                "duration_hours": 12
+                "title": "JavaScript Design Patterns",
+                "platform": "youtube",
+                "url": "https://www.youtube.com/watch?v=kuirGzhGhyw",
+                "resource_type": "video",
+                "description": "Deep dive into JS design patterns",
+                "reason": "Understand advanced JS patterns",
+                "is_free": True,
+                "duration_hours": 2
             }
         ]
     },
@@ -336,26 +275,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Comprehensive Python fundamentals",
                 "is_free": True,
                 "duration_hours": 4.5
-            },
-            {
-                "title": "Python for Everybody Specialization",
-                "platform": "coursera",
-                "url": "https://www.coursera.org/specializations/python",
-                "resource_type": "course",
-                "description": "University of Michigan Python specialization",
-                "reason": "Most popular Python course on Coursera",
-                "is_free": False,
-                "duration_hours": 80
-            },
-            {
-                "title": "100 Days of Code: The Complete Python Pro Bootcamp",
-                "platform": "udemy",
-                "url": "https://www.udemy.com/course/100-days-of-code/",
-                "resource_type": "course",
-                "description": "Dr. Angela Yu's Python bootcamp",
-                "reason": "Project-based learning with 100 projects",
-                "is_free": False,
-                "duration_hours": 60
             }
         ],
         "intermediate": [
@@ -416,16 +335,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Practical MySQL skills",
                 "is_free": True,
                 "duration_hours": 3
-            },
-            {
-                "title": "SQL for Data Science",
-                "platform": "coursera",
-                "url": "https://www.coursera.org/learn/sql-for-data-science",
-                "resource_type": "course",
-                "description": "UC Davis SQL course",
-                "reason": "University-backed SQL curriculum",
-                "is_free": False,
-                "duration_hours": 20
             }
         ],
         "intermediate": [
@@ -438,16 +347,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Window functions, CTEs, subqueries",
                 "is_free": True,
                 "duration_hours": 3
-            },
-            {
-                "title": "The Complete SQL Bootcamp",
-                "platform": "udemy",
-                "url": "https://www.udemy.com/course/the-complete-sql-bootcamp/",
-                "resource_type": "course",
-                "description": "Jose Portilla's SQL bootcamp",
-                "reason": "Comprehensive SQL with PostgreSQL",
-                "is_free": False,
-                "duration_hours": 9
             }
         ],
         "advanced": [
@@ -476,16 +375,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Comprehensive data structures tutorial",
                 "is_free": True,
                 "duration_hours": 8
-            },
-            {
-                "title": "Data Structures and Algorithms Specialization",
-                "platform": "coursera",
-                "url": "https://www.coursera.org/specializations/data-structures-algorithms",
-                "resource_type": "course",
-                "description": "UC San Diego DSA specialization",
-                "reason": "University-backed DSA curriculum",
-                "is_free": False,
-                "duration_hours": 100
             }
         ],
         "intermediate": [
@@ -526,16 +415,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Comprehensive algorithms introduction",
                 "is_free": True,
                 "duration_hours": 5
-            },
-            {
-                "title": "Algorithms, Part I",
-                "platform": "coursera",
-                "url": "https://www.coursera.org/learn/algorithms-part1",
-                "resource_type": "course",
-                "description": "Princeton Algorithms course by Sedgewick",
-                "reason": "Gold standard algorithms education",
-                "is_free": False,
-                "duration_hours": 54
             }
         ],
         "intermediate": [
@@ -552,14 +431,14 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
         ],
         "advanced": [
             {
-                "title": "Algorithms, Part II",
-                "platform": "coursera",
-                "url": "https://www.coursera.org/learn/algorithms-part2",
-                "resource_type": "course",
-                "description": "Princeton advanced algorithms",
-                "reason": "Advanced algorithmic techniques",
-                "is_free": False,
-                "duration_hours": 63
+                "title": "MIT 6.006 Introduction to Algorithms",
+                "platform": "youtube",
+                "url": "https://www.youtube.com/watch?v=HtSuA80QTyo",
+                "resource_type": "video",
+                "description": "MIT algorithms lecture series",
+                "reason": "Academic-level algorithm analysis",
+                "is_free": True,
+                "duration_hours": 20
             }
         ]
     },
@@ -588,16 +467,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Practice common DP patterns",
                 "is_free": True,
                 "duration_hours": 5
-            },
-            {
-                "title": "Dynamic Programming for Coding Interviews",
-                "platform": "udemy",
-                "url": "https://www.udemy.com/course/dynamic-programming-for-competitive-programming/",
-                "resource_type": "course",
-                "description": "DP patterns for interviews",
-                "reason": "Master DP for technical interviews",
-                "is_free": False,
-                "duration_hours": 15
             }
         ],
         "advanced": [
@@ -626,26 +495,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Comprehensive ML introduction",
                 "is_free": True,
                 "duration_hours": 10
-            },
-            {
-                "title": "Machine Learning Specialization",
-                "platform": "coursera",
-                "url": "https://www.coursera.org/specializations/machine-learning-introduction",
-                "resource_type": "course",
-                "description": "Andrew Ng's new ML specialization",
-                "reason": "Gold standard ML education by Andrew Ng",
-                "is_free": False,
-                "duration_hours": 80
-            },
-            {
-                "title": "Machine Learning A-Z",
-                "platform": "udemy",
-                "url": "https://www.udemy.com/course/machinelearning/",
-                "resource_type": "course",
-                "description": "Kirill Eremenko's ML course",
-                "reason": "Hands-on ML with Python and R",
-                "is_free": False,
-                "duration_hours": 44
             }
         ],
         "intermediate": [
@@ -662,14 +511,14 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
         ],
         "advanced": [
             {
-                "title": "Deep Learning Specialization",
-                "platform": "coursera",
-                "url": "https://www.coursera.org/specializations/deep-learning",
-                "resource_type": "course",
-                "description": "Andrew Ng's deep learning courses",
-                "reason": "Industry-standard deep learning education",
-                "is_free": False,
-                "duration_hours": 120
+                "title": "Deep Learning Full Course",
+                "platform": "youtube",
+                "url": "https://www.youtube.com/watch?v=VyWAvY2CF9c",
+                "resource_type": "video",
+                "description": "Complete deep learning tutorial",
+                "reason": "Neural networks and deep learning",
+                "is_free": True,
+                "duration_hours": 6
             }
         ]
     },
@@ -686,16 +535,6 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Complete FastAPI introduction",
                 "is_free": True,
                 "duration_hours": 6
-            },
-            {
-                "title": "FastAPI - The Complete Course",
-                "platform": "udemy",
-                "url": "https://www.udemy.com/course/fastapi-the-complete-course/",
-                "resource_type": "course",
-                "description": "Comprehensive FastAPI bootcamp",
-                "reason": "Build production APIs with FastAPI",
-                "is_free": False,
-                "duration_hours": 18
             }
         ],
         "intermediate": [
@@ -748,21 +587,11 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Prepare for system design interviews",
                 "is_free": True,
                 "duration_hours": 2
-            },
-            {
-                "title": "Grokking System Design Interview",
-                "platform": "udemy",
-                "url": "https://www.udemy.com/course/system-design-interview-prep/",
-                "resource_type": "course",
-                "description": "Comprehensive system design course",
-                "reason": "Master system design patterns",
-                "is_free": False,
-                "duration_hours": 10
             }
         ],
         "advanced": [
             {
-                "title": "System Design Interview – Step By Step Guide",
+                "title": "System Design Interview - Step By Step Guide",
                 "platform": "youtube",
                 "url": "https://www.youtube.com/watch?v=i7twT3x5yv8",
                 "resource_type": "video",
@@ -770,6 +599,46 @@ CURATED_RESOURCES: Dict[str, Dict[str, List[Dict[str, Any]]]] = {
                 "reason": "Design complex distributed systems",
                 "is_free": True,
                 "duration_hours": 2
+            }
+        ]
+    },
+    
+    # ==================== AWS ====================
+    "aws": {
+        "beginner": [
+            {
+                "title": "AWS Certified Cloud Practitioner Training",
+                "platform": "youtube",
+                "url": "https://www.youtube.com/watch?v=SOTamWNgDKc",
+                "resource_type": "video",
+                "description": "freeCodeCamp AWS Cloud Practitioner course",
+                "reason": "Complete AWS fundamentals for certification",
+                "is_free": True,
+                "duration_hours": 14
+            }
+        ],
+        "intermediate": [
+            {
+                "title": "AWS Solutions Architect Associate",
+                "platform": "youtube",
+                "url": "https://www.youtube.com/watch?v=Ia-UEYYR44s",
+                "resource_type": "video",
+                "description": "AWS Solutions Architect training",
+                "reason": "Design scalable AWS architectures",
+                "is_free": True,
+                "duration_hours": 10
+            }
+        ],
+        "advanced": [
+            {
+                "title": "AWS Advanced Networking",
+                "platform": "youtube",
+                "url": "https://www.youtube.com/watch?v=hiKPPy584Mg",
+                "resource_type": "video",
+                "description": "Advanced AWS networking concepts",
+                "reason": "Master AWS networking and security",
+                "is_free": True,
+                "duration_hours": 3
             }
         ]
     }
@@ -792,10 +661,11 @@ SKILL_ALIASES: Dict[str, str] = {
     "dp": "dynamic programming",
     "ml": "machine learning",
     "fast api": "fastapi",
-    "sysdes": "system design"
+    "sysdes": "system design",
+    "amazon web services": "aws"
 }
 
-# Generic direct-link fallbacks for unknown skills by level
+# Generic YouTube fallbacks for unknown skills by level
 GENERIC_DIRECT_RESOURCES: Dict[str, List[Dict[str, Any]]] = {
     "beginner": [
         {
@@ -809,26 +679,26 @@ GENERIC_DIRECT_RESOURCES: Dict[str, List[Dict[str, Any]]] = {
             "duration_hours": 25
         },
         {
-            "title": "Programming Foundations with JavaScript, HTML and CSS",
-            "platform": "coursera",
-            "url": "https://www.coursera.org/learn/duke-programming-web",
-            "resource_type": "course",
-            "description": "Duke University programming foundations",
+            "title": "Programming Fundamentals",
+            "platform": "youtube",
+            "url": "https://www.youtube.com/watch?v=zOjov-2OZ0E",
+            "resource_type": "video",
+            "description": "Introduction to programming concepts",
             "reason": "Solid programming fundamentals",
-            "is_free": False,
-            "duration_hours": 20
+            "is_free": True,
+            "duration_hours": 4
         }
     ],
     "intermediate": [
         {
-            "title": "Software Design and Architecture Specialization",
-            "platform": "coursera",
-            "url": "https://www.coursera.org/specializations/software-design-architecture",
-            "resource_type": "course",
-            "description": "Alberta University software design",
-            "reason": "Learn professional software design",
-            "is_free": False,
-            "duration_hours": 60
+            "title": "Software Engineering Full Course",
+            "platform": "youtube",
+            "url": "https://www.youtube.com/watch?v=uJGO4HQLLRU",
+            "resource_type": "video",
+            "description": "Complete software engineering concepts",
+            "reason": "Learn professional software development",
+            "is_free": True,
+            "duration_hours": 8
         }
     ],
     "advanced": [
@@ -845,7 +715,7 @@ GENERIC_DIRECT_RESOURCES: Dict[str, List[Dict[str, Any]]] = {
     ]
 }
 
-# Level-specific query modifiers (kept for search fallback)
+# Level-specific query modifiers (for YouTube search fallback)
 LEVEL_MODIFIERS = {
     "beginner": ["beginner", "fundamentals", "introduction", "basics", "crash course"],
     "intermediate": ["intermediate", "hands-on", "practical", "projects", "in-depth"],
@@ -861,9 +731,7 @@ def normalize_skill_name(skill: str) -> str:
 
 def get_curated_resources(skill: str, level: str) -> List[Dict[str, Any]]:
     """
-    Get curated direct-link resources for a skill and level.
-    
-    Returns resources with actual course URLs, not search URLs.
+    Get curated YouTube video resources for a skill and level.
     """
     skill_normalized = normalize_skill_name(skill)
     level_lower = level.lower().strip()
@@ -894,7 +762,7 @@ def get_curated_resources(skill: str, level: str) -> List[Dict[str, Any]]:
 
 def get_generic_direct_resources(level: str) -> List[Dict[str, Any]]:
     """
-    Get generic direct-link resources for unknown skills.
+    Get generic YouTube resources for unknown skills.
     """
     level_lower = level.lower().strip()
     resources = GENERIC_DIRECT_RESOURCES.get(level_lower, GENERIC_DIRECT_RESOURCES["beginner"])
@@ -908,7 +776,6 @@ def get_generic_direct_resources(level: str) -> List[Dict[str, Any]]:
 def get_all_curated_for_matching(skill: str, level: str) -> List[Dict[str, Any]]:
     """
     Get all curated resources for potential matching with Gemini suggestions.
-    Includes the primary skill level plus adjacent levels.
     """
     skill_normalized = normalize_skill_name(skill)
     level_lower = level.lower().strip()

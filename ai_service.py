@@ -162,3 +162,91 @@ def evaluate_quiz(user_answers: dict, quiz_data: list) -> dict:
             } for q in quiz_data
         ]
     }
+
+def analyze_resume(resume_text: str) -> dict:
+    """Analyzes a resume and suggests career roles."""
+    prompt = f"""
+    You are an expert career counselor.
+    The user has uploaded their resume.
+    Extract key information and suggest exactly 5 specific, realistic job roles they are highly capable of right now.
+    Also, extract their personal information to build a user profile.
+
+    Resume Content:
+    ---
+    {resume_text}
+    ---
+
+    Output strictly in Valid JSON format. The structure MUST be exactly like this, with NO markdown formatting blocks like ```json around it:
+    {{
+      "extracted_text": "A brief 2-sentence summary of their profile.",
+      "suggested_roles": ["Role 1", "Role 2", "Role 3", "Role 4", "Role 5"],
+      "profile": {{
+        "name": "Extracted Name or empty string",
+        "education": ["Degree 1", "Degree 2"],
+        "work_experience": ["Job 1", "Job 2"],
+        "skills": ["Skill 1", "Skill 2"],
+        "certifications": ["Cert 1"],
+        "publications": ["Pub 1"]
+      }}
+    }}
+    """
+    try:
+        response = model.generate_content(prompt)
+        result_text = response.text.strip()
+        if result_text.startswith("```json"):
+            result_text = result_text[7:]
+        if result_text.startswith("```"):
+            result_text = result_text[3:]
+        if result_text.endswith("```"):
+            result_text = result_text[:-3]
+            
+        return json.loads(result_text.strip())
+    except Exception as e:
+        print(f"Error analyzing resume: {e}")
+        return {{
+            "error": "Failed to analyze resume.",
+            "details": str(e)
+        }}
+
+def generate_roadmap(resume_text: str, target_role: str) -> dict:
+    """Generates skills to acquire, certifications, and a markdown mindmap."""
+    prompt = f"""
+    You are an expert career and growth counselor.
+    The user wants to become a "{target_role}".
+    Here is their resume summary:
+    {resume_text}
+
+    1. Identify specific skills they lack for this role.
+    2. Suggest relevant certifications.
+    3. Generate a step-by-step generic mind tree/roadmap to proceed in their career towards their target role.
+
+    Output strictly in Valid JSON format. The structure MUST be exactly like this, with NO markdown formatting blocks like ```json around it:
+    {{
+      "skills_to_acquire": ["Skill 1", "Skill 2"],
+      "certifications": [
+        {{"name": "Cert 1", "reason": "Reason"}}
+      ],
+      "mind_tree": [
+        {{"step": "Step 1", "description": "..."}},
+        {{"step": "Step 2", "description": "..."}}
+      ]
+    }}
+    """
+    try:
+        response = model.generate_content(prompt)
+        result_text = response.text.strip()
+        if result_text.startswith("```json"):
+            result_text = result_text[7:]
+        if result_text.startswith("```"):
+            result_text = result_text[3:]
+        if result_text.endswith("```"):
+            result_text = result_text[:-3]
+            
+        return json.loads(result_text.strip())
+    except Exception as e:
+        print(f"Error generating roadmap: {e}")
+        return {{
+            "error": "Failed to generate roadmap.",
+            "details": str(e)
+        }}
+

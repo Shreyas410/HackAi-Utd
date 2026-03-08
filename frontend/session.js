@@ -31,6 +31,19 @@ let rawContent = "";
 let chatContextHistory = [];
 let quizDataState = [];
 
+// Theme initialization
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark-mode');
+    themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+}
+themeToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    themeToggleBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+});
+
 // Initialize Page
 window.addEventListener('load', async () => {
     // Check if user is logged in

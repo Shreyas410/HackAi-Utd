@@ -42,9 +42,15 @@ class UserSkillProfile(BaseModel):
     starting_skill_level: int = Field(ge=1, le=10)  # 1 to 10 scale
     current_skill_level: int = Field(ge=1, le=10)
     
-    # # History & Assessments
-    # content_history: List[ContentInteraction] = []
-    # quiz_history: List[QuizAttempt] = []
+class UserProfile(BaseModel):
+    user_id: str
+    name: Optional[str] = None
+    education: List[str] = []
+    work_experience: List[str] = []
+    skills: List[str] = []
+    certifications: List[str] = []
+    publications: List[str] = []
+    resume_text: Optional[str] = None
 
 # ==========================================
 # 2. CONNECT TO MONGODB
@@ -58,6 +64,7 @@ client = MongoClient(MONGO_URI, server_api=ServerApi('1'))
 db = client['hackai_db'] # This creates the database if it doesn't exist
 users_collection = db['users']           # Collection for sign-up (email/password)
 skills_collection = db['skills_profiles'] # Collection for questionnaire component (skills info)
+profiles_collection = db['user_profiles'] # Collection for user profile data
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str) -> str:
@@ -98,6 +105,33 @@ def verify_user(email: str, password: str) -> tuple[bool, str]:
         return False, "Invalid email or password."
     
     return True, user_dict.get("user_id")
+
+def save_user_profile(user_id: str, profile_data: dict) -> tuple[bool, str]:
+    """
+    Saves or updates a user profile. Returns (success_bool, message).
+    """
+    try:
+        profile_data['user_id'] = user_id
+        # Use upsert to create if it doesn't exist, or update if it does
+        profiles_collection.update_one(
+            {"user_id": user_id},
+            {"$set": profile_data},
+            upsert=True
+        )
+        return True, "Profile saved successfully."
+    except Exception as e:
+        return False, f"Database error saving profile: {e}"
+
+def get_user_profile(user_id: str) -> Optional[dict]:
+    """
+    Retrieves a user profile by user_id. Returns dictionary or None.
+    """
+    try:
+        profile = profiles_collection.find_one({"user_id": user_id}, {"_id": 0})
+        return profile
+    except Exception as e:
+        print(f"Database error fetching profile: {e}")
+        return None
 
 if __name__ == "__main__":
     # Ping the database to confirm connection

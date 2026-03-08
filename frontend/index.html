@@ -7,6 +7,9 @@
     <title>LearnPath - Your Personalized Learning Journey</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-lib@0.17.0/dist/browser/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-view@0.17.0/dist/browser/index.js"></script>
 </head>
 
 <body>
@@ -22,6 +25,13 @@
                 <a href="#how-it-works" class="nav-link">How it Works</a>
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#categories" class="nav-link">Categories</a>
+                <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="nav-link" id="myProfileBtn"
+                    style="display: none; background: transparent; border: none; cursor: pointer; color: var(--text-color); font-weight: 500;">
+                    <i class="fas fa-user-circle"></i> My Profile
+                </button>
                 <button class="login-btn" id="loginBtn">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
@@ -146,6 +156,39 @@
                     </div>
                     <button class="btn btn-primary btn-block" onclick="navigateToQuickLearn()">
                         Select Time Slot
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Category 3: Career Trajectory -->
+                <div class="category-card career-trajectory-card" id="careerTrajectoryCard">
+                    <div class="card-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <h3>Career Trajectory</h3>
+                    <p class="card-description">
+                        Upload your resume and get AI-powered career path recommendations and skill gap analysis.
+                    </p>
+                    <div class="card-features">
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Resume Analysis</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Role Suggestions</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Skill & Certification Gaps</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Career Mind Tree</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="navigateToCareerTrajectory()">
+                        Analyze Resume
                         <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
@@ -454,6 +497,130 @@
                     <i class="fas fa-bolt"></i> Start Learning Session
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- Career Trajectory Setup Modal -->
+    <div class="modal" id="careerTrajectorySetupModal">
+        <div class="modal-content">
+            <span class="close" id="closeCareerTrajectorySetup">&times;</span>
+            <h2>Career Trajectory Analysis</h2>
+            <p style="margin-bottom: 20px; color: #666; font-size: 0.9em; text-align: center;">Upload your resume to
+                discover your optimal career path.</p>
+
+            <form id="careerTrajectoryForm" onsubmit="return false;">
+
+                <div id="ctStep1">
+                    <div class="form-group">
+                        <label for="ctResume">Upload Resume (PDF or DOCX)</label>
+                        <input type="file" id="ctResume" accept=".pdf,.docx" required>
+                    </div>
+
+                    <button type="button" class="btn btn-primary btn-block" id="ctAnalyzeBtn">
+                        <i class="fas fa-file-alt"></i> Analyze Resume
+                    </button>
+                </div>
+
+                <div id="ctStep2"
+                    style="display: none; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                    <div id="ctSuggestedRolesContainer" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Suggested Roles:</label>
+                        <div id="ctSuggestedRolesList" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <!-- Suggested roles injected here -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ctTargetRole">Target Role</label>
+                        <input type="text" id="ctTargetRole" placeholder="e.g. Frontend Developer, Data Scientist">
+                    </div>
+
+                    <button type="button" class="btn btn-primary btn-block" id="ctGenerateRoadmapBtn">
+                        <i class="fas fa-magic"></i> Generate Career Roadmap
+                    </button>
+
+                    <input type="hidden" id="ctExtractedText">
+                </div>
+
+                <div id="ctLoadingIndicator" style="display: none; text-align: center; margin-top: 15px;">
+                    <i class="fas fa-spinner fa-spin"></i> <span id="ctLoadingMessage">Analyzing resume...</span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div class="modal" id="userProfileModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="close" id="closeUserProfileModal">&times;</span>
+            <h2 style="margin-bottom: 20px;"><i class="fas fa-user-circle"></i> My Profile</h2>
+
+            <form id="userProfileForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="upName">Full Name</label>
+                    <input type="text" id="upName" placeholder="Your Name">
+                </div>
+
+                <div class="form-group">
+                    <label for="upEducation">Education</label>
+                    <textarea id="upEducation" rows="3" placeholder="Degree, University, Year"
+                        style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; resize: vertical; margin-bottom: 5px;"></textarea>
+                    <small>Separate entries with new lines</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="upExperience">Work Experience</label>
+                    <textarea id="upExperience" rows="4" placeholder="Role, Company, Description"
+                        style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; resize: vertical; margin-bottom: 5px;"></textarea>
+                    <small>Separate entries with new lines</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="upSkills">Skills</label>
+                    <input type="text" id="upSkills" placeholder="Python, React, Marketing...">
+                    <small>Comma-separated</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="upCertifications">Certifications</label>
+                    <input type="text" id="upCertifications" placeholder="AWS Cloud Practitioner, PMP...">
+                    <small>Comma-separated</small>
+                </div>
+
+                <button type="button" class="btn btn-primary btn-block" id="upSaveBtn" style="margin-bottom: 20px;">
+                    <i class="fas fa-save"></i> Save Profile
+                </button>
+
+                <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                    <h3 style="margin-bottom: 10px; font-size: 1.1em;">Update Profile via Resume</h3>
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Overwrites current data below with
+                        freshly extracted information.</p>
+                    <input type="file" id="upResumeReupload" accept=".pdf,.docx" style="margin-bottom: 10px;">
+                    <button type="button" class="btn btn-secondary btn-block" id="upReuploadBtn">
+                        <i class="fas fa-sync"></i> Re-scan Resume
+                    </button>
+                    <div id="upLoadingIndicator" style="display: none; text-align: center; margin-top: 15px;">
+                        <i class="fas fa-spinner fa-spin"></i> Scanning and updating...
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Career Trajectory Results Modal -->
+    <div class="modal" id="careerTrajectoryResultsModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close" id="closeCareerTrajectoryResults">&times;</span>
+            <h2>Your Career Roadmap</h2>
+
+            <div id="ctResultsContent" style="margin-top: 20px;">
+                <!-- Content will be populated dynamically -->
+            </div>
+
+            <button class="btn btn-secondary btn-block" style="margin-top: 20px;"
+                onclick="navigateToQuickLearnFromCT()">
+                <i class="fas fa-bolt"></i> Ready to learn? Go to Quick Learner
+            </button>
         </div>
     </div>
 

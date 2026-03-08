@@ -98,9 +98,40 @@ class SentimentAnalyzer:
         # Classify comments using Gemini
         positive, negative, neutral = self._classify_comments(comments)
         
-        # Calculate raw score
-        # positive = 1, neutral = 0.5, negative = 0
-        raw_score = (positive * 1.0 + neutral * 0.5 + negative * 0.0) / total_comments
+        # Determine actual classified count (may be slightly less than total if some failed parsing)
+        classified_count = positive + negative + neutral
+        
+        if classified_count == 0:
+             return SentimentResult(
+                score=0.0,
+                summary="No Data (0.0/5)",
+                confidence=0.10,
+                positive_count=0,
+                negative_count=0,
+                neutral_count=0,
+                total_comments=total_comments,
+                comments_available=comments_available,
+                note="Failed to classify any comments"
+            )
+
+        # Calculate raw score 
+        # Tech tutorials get lots of neutral comments (questions, timestamps). We shouldn't punish videos for having long discussions.
+        # So we base the score heavily on the positive vs negative ratio, essentially ignoring neutral comments.
+        
+        opinionated_count = positive + negative
+        
+        if opinionated_count == 0:
+            # If the video has almost entirely "neutral" comments, the API failed to find strong opinions at all. Let's just grade on a relaxed curve.
+            raw_score = 0.6 # 3.0 / 5.0
+        else:
+            # Ratio of positive vs all non-neutral comments
+            base_sentiment = positive / opinionated_count
+            
+            # If there are no negative comments, it's a perfect score minus a tiny penalty for low engagement
+            if negative == 0:
+                raw_score = 0.95 + (positive / 100) * 0.05
+            else:
+                raw_score = base_sentiment
         
         # Convert to 5-point scale
         score = round(raw_score * 5, 1)
@@ -142,11 +173,13 @@ class SentimentAnalyzer:
         if not comments:
             return 0, 0, 0
         
-        # Prepare comments for batch classification
-        comment_texts = [c.text[:500] for c in comments[:100]]  # Limit to 100 comments
+        # Prepare comments for batch classification. Limit to 50 for AI speed and reliability
+        comment_texts = [c.text[:500] for c in comments[:50]]
         
         try:
             classifications = self._batch_classify(comment_texts)
+            if not classifications:
+                return self._simple_classify(comment_texts)
             
             positive = sum(1 for c in classifications if c == "positive")
             negative = sum(1 for c in classifications if c == "negative")
@@ -167,7 +200,7 @@ class SentimentAnalyzer:
             return []
         
         # Build prompt for batch classification
-        comments_text = "\n".join([f"{i+1}. {c}" for i, c in enumerate(comments[:50])])
+        comments_text = "\n".join([f"{i+1}. {c}" for i, c in enumerate(comments)])
         
         prompt = f"""Classify each YouTube comment as positive, negative, or neutral.
 
@@ -179,15 +212,11 @@ CLASSIFICATION RULES:
 COMMENTS TO CLASSIFY:
 {comments_text}
 
-OUTPUT FORMAT:
-Return ONLY a JSON array with the classification for each comment in order:
-["positive", "neutral", "negative", ...]
-
-Return exactly {len(comments[:50])} classifications."""
+Return exactly {len(comments)} classifications. Do NOT stop early. You must output exactly {len(comments)} string elements."""
 
         try:
             if not getattr(self.gemini_client, 'model', None):
-                return self._simple_classify_list(comments[:50])
+                return self._simple_classify_list(comments)
             response = self.gemini_client.model.generate_content(prompt)
             raw_text = (response.text or "").strip()
             
@@ -211,19 +240,22 @@ Return exactly {len(comments[:50])} classifications."""
                         normalized.append("neutral")
                 
                 # Pad if needed
-                while len(normalized) < len(comments[:50]):
+                while len(normalized) < len(comments):
                     normalized.append("neutral")
                 
-                return normalized[:len(comments[:50])]
+                return normalized[:len(comments)]
             
             raise ValueError("Could not parse classification response")
             
         except Exception as e:
             logger.warning(f"Batch classification failed: {e}, using simple method")
-            return self._simple_classify_list(comments[:50])
+            return self._simple_classify_list(comments)
     
     def _simple_classify(self, comments: List[str]) -> Tuple[int, int, int]:
         """Simple keyword-based fallback classification."""
+        if not comments:
+            return 0, 0, 0
+            
         classifications = self._simple_classify_list(comments)
         positive = sum(1 for c in classifications if c == "positive")
         negative = sum(1 for c in classifications if c == "negative")
@@ -254,7 +286,11 @@ Return exactly {len(comments[:50])} classifications."""
                 results.append("positive")
             elif neg_count > pos_count:
                 results.append("negative")
+            elif pos_count > 0 and neg_count > 0:
+                results.append("neutral")
             else:
+                # If neither positive nor negative words are present, it's essentially blank/unhelpful
+                # We can safely classify these as neutral, or just omit them from the core ratio
                 results.append("neutral")
         
         return results

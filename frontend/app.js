@@ -8,7 +8,10 @@ let state = {
     questionnaire: [],
     currentLevel: null,
     quizId: null,
-    quizQuestions: []
+    quizQuestions: [],
+    recommendations: [],
+    analyzedVideos: {},
+    compareVideoId: null
 };
 
 // Utility Functions
@@ -324,7 +327,10 @@ function renderRecommendations(recommendations, meta) {
         console.log(`Direct links: ${meta.direct_count || 0}, Search links: ${meta.search_count || 0}`);
     }
     
-    container.innerHTML = recommendations.map(rec => {
+    // Store recommendations for sentiment analysis
+    state.recommendations = recommendations;
+    
+    container.innerHTML = recommendations.map((rec, index) => {
         const platform = (rec.platform || 'unknown').toLowerCase();
         const duration = rec.duration_hours || rec.duration || null;
         const title = rec.title || 'Recommended Course';
@@ -338,13 +344,16 @@ function renderRecommendations(recommendations, meta) {
         const urlType = rec.url_type || 'direct';
         const source = rec.source || '';
         
+        // Extract video ID for sentiment analysis
+        const videoId = extractVideoId(url);
+        
         // Build meta info
         let metaItems = [];
         if (duration) metaItems.push(`<span>⏱️ ${duration}h</span>`);
         metaItems.push(`<span>${price}</span>`);
         if (rating) metaItems.push(`<span>⭐ ${rating}</span>`);
         
-        // URL type badge - YouTube API verified is best, then direct, then search
+        // URL type badge
         let urlTypeBadge;
         if (source === 'youtube_api') {
             urlTypeBadge = '<span class="url-type-badge verified">✓ Verified</span>';
@@ -354,15 +363,16 @@ function renderRecommendations(recommendations, meta) {
             urlTypeBadge = '<span class="url-type-badge search">🔍 Search</span>';
         }
         
-        // Link text based on URL type
         const linkText = urlType === 'direct' ? 'Open Course →' : 'View Search Results →';
-        
-        // Card class - verified links get special styling
         const cardClass = source === 'youtube_api' ? 'verified-link' : 
                          (urlType === 'direct' ? 'direct-link' : 'search-link');
         
+        // Sentiment analysis button (only for YouTube videos with valid IDs)
+        const sentimentButton = videoId ? 
+            `<button class="analyze-btn" onclick="analyzeSentiment('${videoId}', ${index})">📊 Analyze Sentiment</button>` : '';
+        
         return `
-            <div class="recommendation-card ${cardClass}">
+            <div class="recommendation-card ${cardClass}" id="rec-card-${index}">
                 <div class="card-header">
                     <span class="platform-badge ${platform}">${platform}</span>
                     <span class="difficulty-badge ${difficulty}">${difficulty}</span>
@@ -373,10 +383,198 @@ function renderRecommendations(recommendations, meta) {
                     ${metaItems.join('')}
                 </div>
                 ${reason ? `<p class="reason">${escapeHtml(reason)}</p>` : ''}
-                <a href="${url}" target="_blank" rel="noopener noreferrer" class="view-link">${linkText}</a>
+                <div class="sentiment-container" id="sentiment-${index}"></div>
+                <div class="card-actions">
+                    <a href="${url}" target="_blank" rel="noopener noreferrer" class="view-link">${linkText}</a>
+                    ${sentimentButton}
+                </div>
             </div>
         `;
     }).join('');
+}
+
+// Extract YouTube video ID from URL
+function extractVideoId(url) {
+    if (!url) return null;
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
+        /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/
+    ];
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) return match[1];
+    }
+    return null;
+}
+
+// Analyze sentiment for a video
+async function analyzeSentiment(videoId, cardIndex) {
+    const container = document.getElementById(`sentiment-${cardIndex}`);
+    container.innerHTML = '<div class="loading-sentiment">Analyzing comments...</div>';
+    
+    try {
+        const response = await fetch(`${API_BASE}/video-analysis/analyze?video_id=${videoId}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            container.innerHTML = `<div class="sentiment-error">Could not analyze: ${data.message}</div>`;
+            return;
+        }
+        
+        // Store for comparison
+        state.analyzedVideos = state.analyzedVideos || {};
+        state.analyzedVideos[videoId] = data;
+        
+        renderSentimentResult(container, data.sentiment, videoId);
+    } catch (error) {
+        container.innerHTML = `<div class="sentiment-error">Analysis failed: ${error.message}</div>`;
+    }
+}
+
+// Render sentiment analysis result
+function renderSentimentResult(container, sentiment, videoId) {
+    const scoreClass = sentiment.score >= 4 ? 'excellent' : 
+                      sentiment.score >= 3 ? 'good' : 
+                      sentiment.score >= 2 ? 'average' : 'poor';
+    
+    container.innerHTML = `
+        <div class="sentiment-result ${scoreClass}">
+            <div class="sentiment-header">
+                <span class="sentiment-score">${sentiment.summary}</span>
+                <span class="sentiment-confidence">Confidence: ${Math.round(sentiment.confidence * 100)}%</span>
+            </div>
+            <div class="sentiment-breakdown">
+                <span class="positive">👍 ${sentiment.positive_count}</span>
+                <span class="neutral">😐 ${sentiment.neutral_count}</span>
+                <span class="negative">👎 ${sentiment.negative_count}</span>
+            </div>
+            ${sentiment.note ? `<div class="sentiment-note">${sentiment.note}</div>` : ''}
+            <button class="compare-btn" onclick="showCompareModal('${videoId}')">Compare with another video</button>
+        </div>
+    `;
+}
+
+// Show comparison modal
+function showCompareModal(recommendedVideoId) {
+    state.compareVideoId = recommendedVideoId;
+    
+    const modal = document.createElement('div');
+    modal.id = 'compare-modal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeCompareModal()">&times;</span>
+            <h3>Compare with Another Video</h3>
+            <p>Paste a YouTube URL to compare:</p>
+            <input type="text" id="compare-url-input" placeholder="https://www.youtube.com/watch?v=..." />
+            <button onclick="compareVideos()" class="primary-btn">Compare Videos</button>
+            <div id="comparison-result"></div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// Close comparison modal
+function closeCompareModal() {
+    const modal = document.getElementById('compare-modal');
+    if (modal) modal.remove();
+}
+
+// Compare two videos
+async function compareVideos() {
+    const comparisonUrl = document.getElementById('compare-url-input').value.trim();
+    const resultContainer = document.getElementById('comparison-result');
+    
+    if (!comparisonUrl) {
+        resultContainer.innerHTML = '<div class="error">Please enter a YouTube URL</div>';
+        return;
+    }
+    
+    resultContainer.innerHTML = '<div class="loading-sentiment">Comparing videos...</div>';
+    
+    try {
+        const response = await fetch(`${API_BASE}/video-analysis/compare`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                comparison_url: comparisonUrl,
+                recommended_video_id: state.compareVideoId
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            resultContainer.innerHTML = `<div class="error">${data.message}</div>`;
+            return;
+        }
+        
+        renderComparisonResult(resultContainer, data);
+    } catch (error) {
+        resultContainer.innerHTML = `<div class="error">Comparison failed: ${error.message}</div>`;
+    }
+}
+
+// Render comparison result
+function renderComparisonResult(container, data) {
+    const rec = data.recommended_video;
+    const comp = data.comparison_video;
+    const result = data.comparison_result;
+    
+    const winnerClass = result.better_video === 'recommended_video' ? 'winner-rec' :
+                       result.better_video === 'comparison_video' ? 'winner-comp' : 'inconclusive';
+    
+    container.innerHTML = `
+        <div class="comparison-result ${winnerClass}">
+            <div class="comparison-header">
+                <h4>${result.better_video === 'inconclusive' ? 'No clear winner' : 
+                    result.better_video === 'recommended_video' ? 'Recommended video wins!' : 'Your video wins!'}</h4>
+                <p>${result.reason}</p>
+            </div>
+            
+            <div class="comparison-grid">
+                <div class="video-comparison ${result.better_video === 'recommended_video' ? 'winner' : ''}">
+                    <h5>Recommended</h5>
+                    <p class="video-title">${escapeHtml(rec.title)}</p>
+                    <div class="score">${rec.sentiment.summary}</div>
+                    <div class="stats">
+                        <span>👁️ ${formatNumber(rec.viewCount)} views</span>
+                        <span>⏱️ ${rec.duration}</span>
+                    </div>
+                    <div class="breakdown">
+                        👍 ${rec.sentiment.positive_count} | 
+                        😐 ${rec.sentiment.neutral_count} | 
+                        👎 ${rec.sentiment.negative_count}
+                    </div>
+                </div>
+                
+                <div class="video-comparison ${result.better_video === 'comparison_video' ? 'winner' : ''}">
+                    <h5>Your Video</h5>
+                    <p class="video-title">${escapeHtml(comp.title)}</p>
+                    <div class="score">${comp.sentiment.summary}</div>
+                    <div class="stats">
+                        <span>👁️ ${formatNumber(comp.viewCount)} views</span>
+                        <span>⏱️ ${comp.duration}</span>
+                    </div>
+                    <div class="breakdown">
+                        👍 ${comp.sentiment.positive_count} | 
+                        😐 ${comp.sentiment.neutral_count} | 
+                        👎 ${comp.sentiment.negative_count}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="confidence-note">${result.confidence_note}</div>
+        </div>
+    `;
+}
+
+// Format large numbers
+function formatNumber(num) {
+    if (!num) return '0';
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
 }
 
 function escapeHtml(text) {
@@ -454,7 +652,10 @@ function startOver() {
         questionnaire: [],
         currentLevel: null,
         quizId: null,
-        quizQuestions: []
+        quizQuestions: [],
+        recommendations: [],
+        analyzedVideos: {},
+        compareVideoId: null
     };
     
     // Reset forms

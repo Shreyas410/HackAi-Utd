@@ -31,6 +31,7 @@ from .routers import (
     resources_router,
     privacy_router
 )
+from .routers.video_analysis import router as video_analysis_router
 from . import __version__
 
 
@@ -126,6 +127,7 @@ app.include_router(practice_router)
 app.include_router(concept_map_router)
 app.include_router(resources_router)
 app.include_router(privacy_router)
+app.include_router(video_analysis_router)
 
 
 @app.get("/", tags=["Root"])

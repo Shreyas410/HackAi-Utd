@@ -640,6 +640,302 @@ header h1 {
     display: none !important;
 }
 
+/* Sentiment Analysis Styles */
+.card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.analyze-btn, .compare-btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.analyze-btn {
+    background: #f0f9ff;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+.analyze-btn:hover {
+    background: #e0f2fe;
+}
+
+.compare-btn {
+    background: #fefce8;
+    color: #a16207;
+    border: 1px solid #fef08a;
+}
+
+.compare-btn:hover {
+    background: #fef9c3;
+}
+
+.sentiment-container {
+    margin: 12px 0;
+}
+
+.loading-sentiment {
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.sentiment-error {
+    padding: 12px;
+    background: #fef2f2;
+    border-radius: 8px;
+    color: #dc2626;
+    font-size: 0.85rem;
+}
+
+.sentiment-result {
+    padding: 14px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border-left: 4px solid #94a3b8;
+}
+
+.sentiment-result.excellent {
+    border-left-color: #10b981;
+    background: #ecfdf5;
+}
+
+.sentiment-result.good {
+    border-left-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.sentiment-result.average {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.sentiment-result.poor {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+}
+
+.sentiment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.sentiment-score {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.sentiment-confidence {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.sentiment-breakdown {
+    display: flex;
+    gap: 16px;
+    font-size: 0.9rem;
+}
+
+.sentiment-breakdown .positive { color: #10b981; }
+.sentiment-breakdown .neutral { color: #6b7280; }
+.sentiment-breakdown .negative { color: #ef4444; }
+
+.sentiment-note {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: #64748b;
+    font-style: italic;
+}
+
+/* Comparison Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.modal-content {
+    background: white;
+    padding: 28px;
+    border-radius: 16px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal-content h3 {
+    margin-bottom: 12px;
+    color: #1e293b;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin: 12px 0;
+    font-size: 1rem;
+}
+
+.close-btn {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.close-btn:hover {
+    color: #1e293b;
+}
+
+.primary-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+}
+
+.primary-btn:hover {
+    background: #4338ca;
+}
+
+/* Comparison Result */
+.comparison-result {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+.comparison-result.winner-rec {
+    background: #ecfdf5;
+    border: 2px solid #10b981;
+}
+
+.comparison-result.winner-comp {
+    background: #eff6ff;
+    border: 2px solid #3b82f6;
+}
+
+.comparison-result.inconclusive {
+    background: #fefce8;
+    border: 2px solid #f59e0b;
+}
+
+.comparison-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.comparison-header h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+}
+
+.comparison-header p {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.video-comparison {
+    padding: 16px;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid transparent;
+}
+
+.video-comparison.winner {
+    border-color: #10b981;
+    background: #f0fdf4;
+}
+
+.video-comparison h5 {
+    margin: 0 0 8px 0;
+    color: #64748b;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.video-comparison .video-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.video-comparison .score {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: #1e293b;
+}
+
+.video-comparison .stats {
+    display: flex;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.video-comparison .breakdown {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.confidence-note {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-style: italic;
+}
+
+.error {
+    padding: 12px;
+    background: #fef2f2;
+    border-radius: 8px;
+    color: #dc2626;
+    text-align: center;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .container {
@@ -661,5 +957,18 @@ header h1 {
     .btn {
         width: 100%;
         justify-content: center;
+    }
+    
+    .comparison-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-actions {
+        flex-direction: column;
+    }
+    
+    .analyze-btn, .compare-btn {
+        width: 100%;
+        text-align: center;
     }
 }
